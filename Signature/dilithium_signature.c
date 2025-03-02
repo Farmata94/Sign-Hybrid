@@ -5,7 +5,7 @@
 #include "dilithium/ref/params.h"
 
 
-int main() {
+int dilithium_sign() {
     uint8_t public_key[CRYPTO_PUBLICKEYBYTES];
     uint8_t secret_key[CRYPTO_SECRETKEYBYTES];
     uint8_t signature[CRYPTO_BYTES];

@@ -15,7 +15,7 @@ void print_hex(const char *label, const unsigned char *data, size_t len) {
     printf("\n");
 }
 
-int main() {
+int dsa_dilithium() {
     /*------------------------------*/
     /* 1. Génération des clés       */
     /*------------------------------*/

@@ -6,7 +6,7 @@
 #include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
 #include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
 
-int main(void) {
+int dsa_sign(void) {
     /*---------------------*/
     /* 1. Initialisation   */
     /*---------------------*/

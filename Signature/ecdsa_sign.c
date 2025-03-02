@@ -8,7 +8,7 @@
 #include <openssl/err.h>
 #include <openssl/pem.h> 
 
-int main(void) {
+int ecdsa_sign(void) {
 
     /* 1. Initialisation   */
 
@@ -43,7 +43,7 @@ int main(void) {
         return 1;
     }
 
-    if (!ECDSA_sign(0, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, ec_key)) {
+    if (!ECDSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, ec_key)) {
         fprintf(stderr, "Erreur : échec de la signature du message.\n");
         free(signature);
         EC_KEY_free(ec_key);

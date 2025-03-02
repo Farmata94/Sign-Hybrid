@@ -6,7 +6,7 @@
 #include <openssl/sha.h>
 #include <openssl/err.h>
 
-int main(void) {
+int rsa_sign(void) {
 
     /* 1. Initialisation   */
 
