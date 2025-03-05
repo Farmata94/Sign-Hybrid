@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "falcon.h"
+#include "PQCLean"
 
 int falcon_sign(); //Déclaration de la fonction
 
