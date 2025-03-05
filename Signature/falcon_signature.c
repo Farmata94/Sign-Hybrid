@@ -1,41 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
-#include "falcon.h"
+#include <string.h>
+#include "PQClean"  // Inclure l'implémentation PQClean de Falcon-512
 
-#define MESSAGE "Bonjour, ceci est un message signé avec Falcon!"
+#define MESSAGE "Hello, Falcon!"
 
 int falcon_sign() {
-    // Buffers pour les clés, signature et message
-    uint8_t sk[1280];  // Clé privée (taille maximale pour Falcon-1024)
-    uint8_t pk[1024];  // Clé publique
-    uint8_t sig[1024]; // Signature
+    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sk[CRYPTO_SECRETKEYBYTES];
+    uint8_t sig[CRYPTO_BYTES + strlen(MESSAGE)];
     size_t sig_len;
+    uint8_t message[strlen(MESSAGE)];
+    uint8_t verified_message[strlen(MESSAGE) + CRYPTO_BYTES];
+    size_t verified_message_len;
     
-    // Génération de la clé (Falcon-512)
-    if (falcon_keygen_make(9, sk, sizeof(sk), pk, sizeof(pk), NULL, 0) != 0) {
-        fprintf(stderr, "Erreur lors de la génération des clés\n");
+    memcpy(message, MESSAGE, strlen(MESSAGE));
+    
+    // Génération de clé
+    if (crypto_sign_keypair(pk, sk) != 0) {
+        fprintf(stderr, "Erreur de génération de clé\n");
         return EXIT_FAILURE;
     }
-
-    printf("Clés générées avec succès !\n");
-
+    
     // Signature du message
-    if (falcon_sign_dyn(9, sig, &sig_len, sk, MESSAGE, strlen(MESSAGE), NULL, 0) != 0) {
+    if (crypto_sign(sig, &sig_len, message, strlen(MESSAGE), sk) != 0) {
         fprintf(stderr, "Erreur lors de la signature\n");
         return EXIT_FAILURE;
     }
-
-    printf("Message signé avec succès !\n");
-
+    
+    printf("Signature réussie!\n");
+    
     // Vérification de la signature
-    if (falcon_verify(9, sig, sig_len, pk, MESSAGE, strlen(MESSAGE)) != 0) {
-        fprintf(stderr, "Signature invalide !\n");
+    if (crypto_sign_open(verified_message, &verified_message_len, sig, sig_len, pk) != 0) {
+        fprintf(stderr, "Signature invalide!\n");
         return EXIT_FAILURE;
     }
-
-    printf("Signature vérifiée avec succès !\n");
-
+    
+    printf("Signature valide!\n");
     return EXIT_SUCCESS;
 }
+
