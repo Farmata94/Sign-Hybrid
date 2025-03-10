@@ -9,7 +9,7 @@ Quantum ciphers available : Dilithium, Falcon, PHINICS+
 ## Content 
 
 This repository contains the following files (roughly in order of dependency):
-1. [`dilithium_signature.c`]('dilithium_signature.c') contains shared functions and constants
+1. [`dilithium_signature.c`]('Signature/dilithium_signature.c') contains shared functions and constants
 1. [`rng.py`](rng.py) implements a ChaCha20-based PRNG, useful for KATs (standalone)
 1. [`samplerz.py`](samplerz.py) implements a Gaussian sampler over the integers (standalone)
 1. [`fft_constants.py`](fft_constants.py) contains precomputed constants used in the FFT
