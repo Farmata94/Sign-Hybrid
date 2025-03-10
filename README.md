@@ -9,7 +9,7 @@ Quantum ciphers available : Dilithium, Falcon, PHINICS+
 ## Content 
 
 This repository contains the following files (roughly in order of dependency):
-1. [`Signature/dilithium_signature.c`](Signature/dilithium_signature.c) 
+1. [`dilithium_signature.c`](Signature/dilithium_signature.c) 
 1. [`Signature/dilithium_signature.h`](Signature/dilithium_signature.h)
 1. [`Signature/dsa_dilithium.c`](Signature/dsa_dilithium.c)
 1. [`Signature/dsa_signature.h`](Signature/dsa_signature.h) 
