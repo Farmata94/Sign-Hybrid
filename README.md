@@ -8,7 +8,7 @@ This repository implements the hybrid signature system, which combines classical
 
 ## Content 
 
-This repository contains the following files (roughly in order of dependency):
+This repository contains the following files (roughly in order of dependency) :
 1. [`dilithium_signature.c`](Signature/dilithium_signature.c) 
 1. [`dilithium_signature.h`](Signature/dilithium_signature.h)
 1. [`dsa_dilithium.c`](Signature/dsa_dilithium.c)
@@ -27,5 +27,7 @@ This repository contains the following files (roughly in order of dependency):
 ## Authors
 
 Farmata Cissé
+
 Noémie Mbongo
+
 Cabrel Tayo Foyo
