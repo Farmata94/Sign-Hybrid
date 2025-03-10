@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include "liboqs/build/include/oqs/oqs.h"
+#include <time.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #define snprintf _snprintf // Windows utilise _snprintf
+#else
+    #include <unistd.h>
+#endif
+
+#define MESSAGE "Bonjour, ceci est un message signé avec Falcon!"
+#define SIG_SIZE 1024  // Taille de la signature (dépend du niveau de Falcon, ici Falcon-512)
+
+double get_time() {
+#ifdef _WIN32
+    LARGE_INTEGER freq, start, end;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&start);
+    
+    return (double)start.QuadPart / freq.QuadPart;
+#else
+    struct timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    return start.tv_sec + start.tv_nsec / 1e9;
+#endif
+}
+
+int falcon_sign() {
+    uint8_t sk[1024];  // Clé privée
+    uint8_t pk[1024];  // Clé publique
+    uint8_t signature[SIG_SIZE];
+    size_t sig_len = SIG_SIZE;
+    
+    OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
+    if (!sig) {
+        fprintf(stderr, "Erreur lors de l'initialisation de Falcon\n");
+        return 1;
+    }
+    
+    // Générer la paire de clés Falcon
+    if (OQS_SIG_keypair(sig, pk, sk) != OQS_SUCCESS) {
+        fprintf(stderr, "Erreur lors de la génération des clés Falcon\n");
+        OQS_SIG_free(sig);
+        return 1;
+    }
+    printf("Clés Falcon générées avec succès!\n");
+
+    // Message à signer
+    const uint8_t *message = (const uint8_t *)MESSAGE;
+    size_t message_len = strlen(MESSAGE);
+    
+    // Signer le message
+    double start_time = get_time();
+    if (OQS_SIG_sign(sig, signature, &sig_len, message, message_len, sk) != OQS_SUCCESS) {
+        fprintf(stderr, "Erreur lors de la signature du message\n");
+        OQS_SIG_free(sig);
+        return 1;
+    }
+    double end_time = get_time();
+    double time_spent = end_time - start_time;
+
+    printf("Falcon : %.6f\n", time_spent);
+
+    // Vérifier la signature
+    if (OQS_SIG_verify(sig, signature, sig_len, message, message_len, pk) != OQS_SUCCESS) {
+        fprintf(stderr, "Échec de la vérification de la signature!\n");
+        OQS_SIG_free(sig);
+        return 1;
+    }
+    printf("Signature vérifiée avec succès!\n");
+
+    OQS_SIG_free(sig);
+    return time_spent;
+}
