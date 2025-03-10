@@ -5,6 +5,7 @@
 #include <openssl/sha.h>    // Pour SHA256
 #include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
 #include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
+#include <time.h> 
 
 int dsa_sign(void) {
     /*---------------------*/
@@ -58,6 +59,8 @@ int dsa_sign(void) {
         return 1;
     }
 
+    clock_t start = clock();
+
     // Signer le hachage avec la clé privée DSA
     if (DSA_sign(0, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, dsa) != 1) {
         fprintf(stderr, "Erreur : échec de la signature du message.\n");
@@ -65,7 +68,10 @@ int dsa_sign(void) {
         DSA_free(dsa);
         return 1;
     }
-    printf("Message signé avec succès.\nSignature (en %u octets).\n", sig_len);
+    clock_t end = clock();
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
+    printf("DSA : %.6f\n", time_spent);
 
     /*---------------------------------------*/
     /* 4. Vérification de la signature       */
@@ -88,5 +94,5 @@ int dsa_sign(void) {
     EVP_cleanup();
     ERR_free_strings();
 
-    return 0;
+    return time_spent;
 }

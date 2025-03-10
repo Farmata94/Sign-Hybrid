@@ -3,6 +3,7 @@
 #include <string.h>
 #include "dilithium/ref/api.h"  // Inclut l'API de l'implémentation de référence
 #include "dilithium/ref/params.h"
+#include <time.h>  
 
 
 int dilithium_sign() {
@@ -22,11 +23,16 @@ int dilithium_sign() {
     }
 
     // 2. Signature
+    clock_t start = clock();
     if (pqcrystals_dilithium2_ref_signature(signature, &signature_len, (const uint8_t *)message, message_len, ctx, ctxlen, secret_key) != 0) {
         fprintf(stderr, "Erreur lors de la signature\n");
         return 1;
     }
+    clock_t end = clock();
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
+    printf("Dilithium : %.6f\n", time_spent);
+    
     // 3. Vérification
     if (pqcrystals_dilithium2_ref_verify(signature, signature_len, (const uint8_t *)message, message_len, ctx, ctxlen, public_key) != 0) {
         fprintf(stderr, "Signature invalide\n");
@@ -42,6 +48,6 @@ int dilithium_sign() {
     }
     printf("\n");
 
-    return 0;
+    return time_spent;
 }
 

@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/ec.h>
+#include <openssl/evp.h>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
 #include <openssl/sha.h>
 #include <openssl/err.h>
 #include <openssl/pem.h> 
+#include <time.h>  
 
 int ecdsa_sign(void) {
 
@@ -43,13 +44,19 @@ int ecdsa_sign(void) {
         return 1;
     }
 
+    clock_t start = clock();
+
     if (!ECDSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, ec_key)) {
         fprintf(stderr, "Erreur : échec de la signature du message.\n");
         free(signature);
         EC_KEY_free(ec_key);
         return 1;
     }
-    printf("Message signé avec succès.\nSignature (en %u octets).\n", sig_len);
+    
+    clock_t end = clock();
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
+    printf("ECDSA : %.6f\n", time_spent);
 
 
     /* 4. Vérification de la signature (ECDSA_verify) */
@@ -69,5 +76,5 @@ int ecdsa_sign(void) {
     EVP_cleanup();
     ERR_free_strings();
 
-    return 0;
+    return time_spent;
 }

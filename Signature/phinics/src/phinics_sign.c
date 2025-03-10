@@ -36,7 +36,7 @@ void save_file(const char *filename, uint8_t *data, size_t length) {
     fclose(file);
 }
 
-int main(int argc, char **argv) {
+int phinics_sign(int argc, char **argv) {
     if (argc != 2) {
         printf("❌ Usage: %s <fichier_a_signer>\n", argv[0]);
         return EXIT_FAILURE;

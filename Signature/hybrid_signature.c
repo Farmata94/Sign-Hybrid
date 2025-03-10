@@ -4,10 +4,14 @@
 #include "dsa_signature.h"
 #include "rsa_sign.h"
 #include "ecdsa_sign.h"
+// #include "falcon_signature.h"
 #include "dilithium_signature.h"
+// #include "phinics_sign.h"
 #include "dilithium/ref/api.h" // Pour Dilithium
 #include "dilithium/ref/params.h"
-// #include "falcon_signature.h"
+// #include "liboqs/build/include/oqs/oqs.h"
+// #include "liboqs/build/include/oqs/sig_falcon.h"  // bibliothèque Falcon (libpqcrypto)
+
 
 // Lire le fichier
 int read_file(const char *filename, unsigned char **buffer, size_t *length) {
@@ -38,39 +42,51 @@ int main(int argc, char *argv[]) {
     unsigned char *message, *trad_signature = NULL, *hybrid_signature = NULL;
     size_t message_len, hybrid_sig_len;
     unsigned int trad_sig_len;
-
+    double trad_time = 0, hybrid_time = 0, total_time = 0;
+    
     if (read_file(file_path, &message, &message_len)) return 1;
 
-    // Appel des signatures selon l'algo choisi
-    if (strcmp(trad_algo, "dsa") == 0) {
+    // Trad sign
+    clock_t start_trad = clock();
+    if (strcmp(trad_algo, "DSA") == 0) {
         dsa_sign(message, message_len, &trad_signature, &trad_sig_len);
-    } else if (strcmp(trad_algo, "rsa") == 0) {
+    } else if (strcmp(trad_algo, "RSA") == 0) {
         rsa_sign(message, message_len, &trad_signature, &trad_sig_len);
-    } else if (strcmp(trad_algo, "ecdsa") == 0) {
+    } else if (strcmp(trad_algo, "ECDSA") == 0) {
         ecdsa_sign(message, message_len, &trad_signature, &trad_sig_len);
     } else {
         fprintf(stderr, "Algorithme traditionnel inconnu : %s\n", trad_algo);
         return 1;
     }
+    trad_time = (double)(clock() - start_trad) / CLOCKS_PER_SEC;
 
-    if (strcmp(hybrid_algo, "dilithium") == 0) {
+    // Post-quantique Sign
+    clock_t start_hybrid = clock();
+    if (strcmp(hybrid_algo, "Dilithium") == 0) {
         dilithium_sign(message, message_len, &hybrid_signature, &hybrid_sig_len);
-    // } else if (strcmp(hybrid_algo, "falcon") == 0) {
+    // } else if (strcmp(hybrid_algo, "Falcon") == 0) {
     //     falcon_sign(message, message_len, &hybrid_signature, &hybrid_sig_len);
+    // } else if (strcmp(hybrid_algo, "Phinics") == 0) {
+    //     phinics_sign(message, message_len, &hybrid_signature, &hybrid_sig_len);
     } else {
         fprintf(stderr, "Algorithme hybride inconnu : %s\n", hybrid_algo);
         return 1;
     }
+    hybrid_time = (double)(clock() - start_hybrid) / CLOCKS_PER_SEC;
 
-    // Sauvegarde de la signature hybride
+    // Sign hybride
+    clock_t start_total = clock();
     FILE *out = fopen(output_file, "wb");
     fwrite(&trad_sig_len, sizeof(unsigned int), 1, out);
     fwrite(trad_signature, 1, trad_sig_len, out);
     fwrite(&hybrid_sig_len, sizeof(size_t), 1, out);
     fwrite(hybrid_signature, 1, hybrid_sig_len, out);
     fclose(out);
+    total_time = (double)(clock() - start_total) / CLOCKS_PER_SEC;
 
-    printf("Signature hybride enregistrée dans %s\n", output_file);
+    printf("%s: %.6f\n", trad_algo, trad_time);
+    printf("%s: %.6f\n", hybrid_algo, hybrid_time);
+    printf("Hybrid: %.6f\n", total_time);
 
     free(message);
     free(trad_signature);

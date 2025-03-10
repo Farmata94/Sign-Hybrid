@@ -1,7 +1,12 @@
 {
     "C_Cpp.default.customConfigurationVariables": {},
     "files.associations": {
-        "params.h": "c"
+        "params.h": "c",
+        "api.h": "c",
+        "inner.h": "c",
+        "randombytes.h": "c",
+        "sig_falcon.h": "c"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "cmake.sourceDirectory": "C:/Users/farma/OneDrive/Bureau/Brno/Cours/Project/Sign-Hybrid/Signature/liboqs"
 }

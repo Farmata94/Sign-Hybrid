@@ -1,7 +1,7 @@
 import sys
 import subprocess
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox
-
+import time  # Importer le module pour mesurer le temps
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox,QTableWidget,QTableWidgetItem
 class SignatureApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -10,16 +10,15 @@ class SignatureApp(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
-        # Bouton pour importer un document
+        # Import file
         self.import_button = QPushButton("Import a file", self)
         self.import_button.clicked.connect(self.import_document)
         layout.addWidget(self.import_button)
 
-        # Label pour afficher le fichier importé
         self.file_label = QLabel("No file selected", self)
         layout.addWidget(self.file_label)
 
-        # Sélection de la signature traditionnelle
+        # Select Traditional sign
         self.traditional_label = QLabel("Select the traditional signature algorithm", self)
         layout.addWidget(self.traditional_label)
 
@@ -27,22 +26,24 @@ class SignatureApp(QWidget):
         self.traditional_combo.addItems(["RSA", "DSA", "ECDSA"])
         layout.addWidget(self.traditional_combo)
 
-        # Sélection de la signature hybride
-        self.hybrid_label = QLabel("Select the hybrid signature algorithm:", self)
+        # Select post-quantum sign
+        self.hybrid_label = QLabel("Select the post-quantum signature algorithm:", self)
         layout.addWidget(self.hybrid_label)
 
         self.hybrid_combo = QComboBox(self)
-        self.hybrid_combo.addItems(["Dilithium", "Falcon"])
+        self.hybrid_combo.addItems(["Dilithium", "Falcon", "Phinics"])
         layout.addWidget(self.hybrid_combo)
 
-        # Bouton pour signer
-        self.sign_button = QPushButton("Sign a file", self)
+        # Button sign
+        self.sign_button = QPushButton("Hybrid Sign a file", self)
         self.sign_button.clicked.connect(self.sign_document)  # Lancer la signature
         layout.addWidget(self.sign_button)
 
-        # Label pour le statut
-        self.status_label = QLabel("", self)
-        layout.addWidget(self.status_label)
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(2)
+        self.table.setHorizontalHeaderLabels(["Algorithm", "Time (s)"])
+        layout.addWidget(self.table)
+
 
         self.setLayout(layout)
         self.setWindowTitle("Hybrid Signature")
@@ -67,11 +68,12 @@ class SignatureApp(QWidget):
 
         # Mapping des noms pour l'exécutable C
         algo_mapping = {
-            "RSA": "rsa",
-            "DSA": "dsa",
-            "ECDSA": "ecdsa",
-            "Dilithium": "dilithium",
-            "Falcon": "falcon"
+            "RSA": "RSA",
+            "DSA": "DSA",
+            "ECDSA": "ECDSA",
+            "Dilithium": "Dilithium",
+            "Falcon": "Falcon",
+            "Phinics":"Phinics"
         }
 
         trad_algo_c = algo_mapping[traditional_algo]
@@ -79,14 +81,31 @@ class SignatureApp(QWidget):
 
         output_file = self.file_path + ".signed"
 
+
         # Exécuter le programme C avec les arguments
         command = ["./hybrid_signature", self.file_path, trad_algo_c, hybrid_algo_c, output_file]
         try:
-            subprocess.run(command, check=True)
-            QMessageBox.information(self, "Success", f"File signed successfully!\nSaved as: {output_file}")
-            self.status_label.setText(f"Signed file: {output_file}")
+            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+            output = result.stdout.strip().split("\n")
+
+            times = {}
+            for line in output:
+                try:
+                    algo, time_str = line.split(": ")
+                    times[algo] = float(time_str)
+                except ValueError:
+                    continue  # Ignore lines that don't match the expected format
+
+            self.update_table(times)
+
         except subprocess.CalledProcessError:
             QMessageBox.critical(self, "Error", "Signature process failed!")
+
+    def update_table(self, times):
+        self.table.setRowCount(len(times))
+        for i, (algo, time) in enumerate(times.items()):
+            self.table.setItem(i, 0, QTableWidgetItem(algo))
+            self.table.setItem(i, 1, QTableWidgetItem(f"{time:.6f}"))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
