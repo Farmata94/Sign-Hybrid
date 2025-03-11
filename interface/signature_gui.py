@@ -1,6 +1,6 @@
 import sys
 import subprocess
-import time  # Importer le module pour mesurer le temps
+import time  
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox,QTableWidget,QTableWidgetItem
 class SignatureApp(QWidget):
     def __init__(self):
@@ -39,6 +39,11 @@ class SignatureApp(QWidget):
         self.sign_button.clicked.connect(self.sign_document)  # Lancer la signature
         layout.addWidget(self.sign_button)
 
+        # Button verify
+        self.verify_button = QPushButton("Verify the signature", self)
+        self.verify_button.clicked.connect(self.verify_document)  
+        layout.addWidget(self.verify_button)
+
         self.table = QTableWidget(self)
         self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Algorithm", "Time (s)"])
@@ -49,7 +54,7 @@ class SignatureApp(QWidget):
         self.setWindowTitle("Hybrid Signature")
         self.resize(400, 250)
 
-        self.file_path = None  # Stocke le fichier importé
+        self.file_path = None  
 
     def import_document(self):
         options = QFileDialog.Options()
@@ -80,9 +85,8 @@ class SignatureApp(QWidget):
         hybrid_algo_c = algo_mapping[hybrid_algo]
 
         output_file = self.file_path + ".signed"
+        self.signed_file_path = output_file
 
-
-        # Exécuter le programme C avec les arguments
         command = ["./hybrid_signature", self.file_path, trad_algo_c, hybrid_algo_c, output_file]
         try:
             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
@@ -100,6 +104,27 @@ class SignatureApp(QWidget):
 
         except subprocess.CalledProcessError:
             QMessageBox.critical(self, "Error", "Signature process failed!")
+
+    def verify_document(self):
+        if not self.signed_file_path:
+            QMessageBox.warning(self, "Error", "Please import a signed file first!")
+            return
+
+        # Exécuter le programme C pour vérifier la signature hybride
+        command = ["./hybrid_verify", self.signed_file_path]
+        try:
+            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+            output = result.stdout.strip().split("\n")
+
+            # Affichage des résultats dans l'interface
+            for line in output:
+                print(line)  # Optionnel, pour afficher les résultats dans la console
+
+            # Afficher un message de succès ou d'erreur selon la sortie
+            QMessageBox.information(self, "Verification Result", "\n".join(output))
+
+        except subprocess.CalledProcessError:
+            QMessageBox.critical(self, "Error", "Verification process failed!")
 
     def update_table(self, times):
         self.table.setRowCount(len(times))

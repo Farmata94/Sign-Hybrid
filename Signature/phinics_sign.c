@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <oqs/oqs.h>
+#include "liboqs/build/include/oqs/oqs.h"
 
 #define MESSAGE_MAX_LEN 1024
 
@@ -80,3 +80,4 @@ int phinics_sign(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
+

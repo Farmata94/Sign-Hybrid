@@ -5,7 +5,10 @@
         "api.h": "c",
         "inner.h": "c",
         "randombytes.h": "c",
-        "sig_falcon.h": "c"
+        "sig_falcon.h": "c",
+        "oqs.h": "c",
+        "oqsconfig.h": "c",
+        "ecdsa.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "cmake.sourceDirectory": "C:/Users/farma/OneDrive/Bureau/Brno/Cours/Project/Sign-Hybrid/Signature/liboqs"

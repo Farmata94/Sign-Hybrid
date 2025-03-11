@@ -6,6 +6,7 @@
 #include <openssl/sha.h>
 #include <openssl/err.h>
 #include <time.h>  
+#include "rsa_sign.h"
 
 int rsa_sign(void) {
 
@@ -57,21 +58,7 @@ int rsa_sign(void) {
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("RSA :%.6f\n", time_spent);
-    
-    /* 4. Vérification de la signature       */
-    int verify_result = RSA_verify(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, sig_len, rsa);
-    if (verify_result != 1) {
-        printf("La signature est INVALIDE.\n");
-    } else {
-        printf("La signature est VALIDÉE.\n");
-    }
 
-    /* 5. Nettoyage        */
-    free(signature);
-    RSA_free(rsa);
-    BN_free(e);
-    EVP_cleanup();
-    ERR_free_strings();
 
     return time_spent;
 }

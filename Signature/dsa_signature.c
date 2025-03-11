@@ -5,6 +5,7 @@
 #include <openssl/sha.h>    // Pour SHA256
 #include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
 #include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
+#include "dsa_signature.h"
 #include <time.h> 
 
 int dsa_sign(void) {
@@ -72,27 +73,6 @@ int dsa_sign(void) {
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
     printf("DSA : %.6f\n", time_spent);
-
-    /*---------------------------------------*/
-    /* 4. Vérification de la signature       */
-    /*---------------------------------------*/
-    // Vérifier la signature à l'aide de la clé publique
-    int verify_result = DSA_verify(0, hash, SHA256_DIGEST_LENGTH, signature, sig_len, dsa);
-    if (verify_result < 0) {
-        fprintf(stderr, "Erreur lors de la vérification de la signature.\n");
-    } else if (verify_result == 0) {
-        printf("La signature est INVALIDE.\n");
-    } else {
-        printf("La signature est VALIDÉE.\n");
-    }
-
-    /*---------------------*/
-    /* 5. Nettoyage        */
-    /*---------------------*/
-    free(signature);
-    DSA_free(dsa);
-    EVP_cleanup();
-    ERR_free_strings();
 
     return time_spent;
 }

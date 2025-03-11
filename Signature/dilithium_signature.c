@@ -3,6 +3,7 @@
 #include <string.h>
 #include "dilithium/ref/api.h"  // Inclut l'API de l'implémentation de référence
 #include "dilithium/ref/params.h"
+#include "dilithium_signature.h"
 #include <time.h>  
 
 
@@ -33,20 +34,6 @@ int dilithium_sign() {
 
     printf("Dilithium : %.6f\n", time_spent);
     
-    // 3. Vérification
-    if (pqcrystals_dilithium2_ref_verify(signature, signature_len, (const uint8_t *)message, message_len, ctx, ctxlen, public_key) != 0) {
-        fprintf(stderr, "Signature invalide\n");
-        return 1;
-    }
-
-    printf("Signature valide !\n");
-
-    // Optionnel : afficher la signature en hexadécimal
-    printf("Signature : ");
-    for (size_t i = 0; i < signature_len; i++) {
-        printf("%02x", signature[i]);
-    }
-    printf("\n");
 
     return time_spent;
 }

@@ -8,6 +8,7 @@
 #include <openssl/err.h>
 #include <openssl/pem.h> 
 #include <time.h>  
+#include "ecdsa_sign.h"
 
 int ecdsa_sign(void) {
 
@@ -59,22 +60,6 @@ int ecdsa_sign(void) {
     printf("ECDSA : %.6f\n", time_spent);
 
 
-    /* 4. Vérification de la signature (ECDSA_verify) */
-
-    int verify_result = ECDSA_verify(0, hash, SHA256_DIGEST_LENGTH, signature, sig_len, ec_key);
-    if (verify_result != 1) {
-        printf("La signature est INVALIDE.\n");
-    } else {
-        printf("La signature est VALIDÉE.\n");
-    }
-
-
-    /* 5. Nettoyage        */
-
-    free(signature);
-    EC_KEY_free(ec_key);
-    EVP_cleanup();
-    ERR_free_strings();
-
+    
     return time_spent;
 }
