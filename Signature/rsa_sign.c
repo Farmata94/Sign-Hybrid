@@ -5,60 +5,84 @@
 #include <openssl/pem.h>
 #include <openssl/sha.h>
 #include <openssl/err.h>
-#include <time.h>  
-#include "rsa_sign.h"
+#include <time.h>
 
-int rsa_sign(void) {
+// Structure pour stocker les clés
+typedef struct {
+    RSA *rsa;
+    BIGNUM *e;
+} RSA_Keys;
 
-    /* 1. Initialisation   */
-    OpenSSL_add_all_algorithms();
-    ERR_load_crypto_strings();
+// Structure pour stocker les résultats
+typedef struct {
+    double setup_time;
+    double sign_time;
+    double verify_time;
+    int verify_result;
+} RSA_Performance;
 
-    /* 2. Génération de la clé RSA  */
+// Génération des clés RSA
+RSA_Keys setup_rsa() {
     RSA *rsa = RSA_new();
     BIGNUM *e = BN_new();
     BN_set_word(e, RSA_F4);
+    RSA_generate_key_ex(rsa, 2048, e, NULL);
+    
+    return (RSA_Keys){rsa, e};
+}
 
-    if (!RSA_generate_key_ex(rsa, 2048, e, NULL)) {
-        fprintf(stderr, "Erreur : échec de la génération des clés RSA.\n");
-        RSA_free(rsa);
-        BN_free(e);
-        return 1;
-    }
-    printf("Clé RSA générée avec succès.\n");
-
-    /* 3. Signature d'un message (RSA_sign)  */
-    const char *message = "Hello, this is a test message for RSA signature.";
+// Signature d'un message
+unsigned char* rsa_sign(RSA *rsa, unsigned int *sig_len) {
+    const char *message = "Hello, RSA test message.";
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)message, strlen(message), hash);
 
     unsigned char *signature = malloc(RSA_size(rsa));
-    unsigned int sig_len;
+    RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, sig_len, rsa);
     
-    if (!signature) {
-        fprintf(stderr, "Erreur : allocation mémoire pour la signature.\n");
-        RSA_free(rsa);
-        BN_free(e);
-        return 1;
-    }
-
-    // Démarrer le chronomètre
-    clock_t start = clock();
-
-    if (RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, rsa) != 1) {
-        fprintf(stderr, "Erreur : échec de la signature du message.\n");
-        free(signature);
-        RSA_free(rsa);
-        BN_free(e);
-        return 1;
-    }
-
-    // Arrêter le chronomètre
-    clock_t end = clock();
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-
-    printf("RSA :%.6f\n", time_spent);
-
-
-    return time_spent;
+    return signature;
 }
+
+// Vérification d'une signature
+int rsa_verify(RSA *rsa, unsigned char *signature, unsigned int sig_len) {
+    const char *message = "Hello, RSA test message.";
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*)message, strlen(message), hash);
+    
+    return RSA_verify(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, sig_len, rsa);
+}
+
+// Benchmark complet
+void benchmark_rsa() {
+    RSA_Performance perf;
+    clock_t start, end;
+
+    // Mesure du temps de setup
+    start = clock();
+    RSA_Keys keys = setup_rsa();
+    end = clock();
+    perf.setup_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Mesure du temps de signature
+    unsigned int sig_len;
+    start = clock();
+    unsigned char *signature = rsa_sign(keys.rsa, &sig_len);
+    end = clock();
+    perf.sign_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Mesure du temps de vérification
+    start = clock();
+    perf.verify_result = rsa_verify(keys.rsa, signature, sig_len);
+    end = clock();
+    perf.verify_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Affichage des performances
+    printf("RSA Setup: %.6f\n", perf.setup_time);
+    printf("RSA Sign: %.6f\n", perf.sign_time);
+    printf("RSA Verify: %.6f\n", perf.verify_time);
+
+    free(signature);
+    RSA_free(keys.rsa);
+    BN_free(keys.e);
+}
+

@@ -1,78 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/dsa.h>    // Pour DSA et fonctions associées
-#include <openssl/sha.h>    // Pour SHA256
-#include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
-#include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
-#include "dsa_signature.h"
-#include <time.h> 
+#include <openssl/dsa.h>
+#include <openssl/pem.h>
+#include <openssl/sha.h>
+#include <openssl/err.h>
+#include <time.h>
 
-int dsa_sign(void) {
-    /*---------------------*/
-    /* 1. Initialisation   */
-    /*---------------------*/
-    // Charge les algorithmes et les chaînes d'erreurs OpenSSL
-    OpenSSL_add_all_algorithms();
-    ERR_load_crypto_strings();
+// Structure pour stocker les clés
+typedef struct {
+    DSA *dsa;
+} DSA_Keys;
 
-    /*------------------------------*/
-    /* 2. Génération de la clé DSA  */
-    /*------------------------------*/
-    // Création d'une nouvelle structure DSA
+// Structure pour stocker les résultats
+typedef struct {
+    double setup_time;
+    double sign_time;
+    double verify_time;
+    int verify_result;
+} DSA_Performance;
+
+// Génération des clés DSA
+DSA_Keys setup_dsa() {
     DSA *dsa = DSA_new();
-    if (!dsa) {
-        fprintf(stderr, "Erreur : impossible d'allouer la structure DSA.\n");
-        return 1;
-    }
-
-    // Génération des paramètres DSA (taille : 2048 bits)
-    if (!DSA_generate_parameters_ex(dsa, 2048, NULL, 0, NULL, NULL, NULL)) {
-        fprintf(stderr, "Erreur : échec de la génération des paramètres DSA.\n");
-        DSA_free(dsa);
-        return 1;
-    }
-
-    // Génération de la paire de clés (privée et publique)
-    if (!DSA_generate_key(dsa)) {
-        fprintf(stderr, "Erreur : échec de la génération des clés DSA.\n");
-        DSA_free(dsa);
-        return 1;
-    }
-    printf("Clé DSA générée avec succès.\n");
-
-    /*---------------------------------------*/
-    /* 3. Signature d'un message (DSA_sign)  */
-    /*---------------------------------------*/
-    // Message à signer
-    const char *message = "Hello, this is a test message for DSA signature.";
+    DSA_generate_parameters_ex(dsa, 2048, NULL, 0, NULL, NULL, NULL);
+    DSA_generate_key(dsa);
     
-    // Calcul du hachage SHA256 du message
+    return (DSA_Keys){dsa};
+}
+
+// Signature d'un message
+unsigned char* dsa_sign(DSA *dsa, unsigned int *sig_len) {
+    const char *message = "Hello, DSA test message.";
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)message, strlen(message), hash);
 
-    // Allocation d'un tampon pour la signature
-    unsigned int sig_len = DSA_size(dsa);  // taille maximale de la signature
-    unsigned char *signature = malloc(sig_len);
-    if (!signature) {
-        fprintf(stderr, "Erreur : allocation mémoire pour la signature.\n");
-        DSA_free(dsa);
-        return 1;
-    }
-
-    clock_t start = clock();
-
-    // Signer le hachage avec la clé privée DSA
-    if (DSA_sign(0, hash, SHA256_DIGEST_LENGTH, signature, &sig_len, dsa) != 1) {
-        fprintf(stderr, "Erreur : échec de la signature du message.\n");
-        free(signature);
-        DSA_free(dsa);
-        return 1;
-    }
-    clock_t end = clock();
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-
-    printf("DSA : %.6f\n", time_spent);
-
-    return time_spent;
+    unsigned char *signature = malloc(DSA_size(dsa));
+    DSA_sign(0, hash, SHA256_DIGEST_LENGTH, signature, sig_len, dsa);
+    
+    return signature;
 }
+
+// Vérification d'une signature
+int dsa_verify(DSA *dsa, unsigned char *signature, unsigned int sig_len) {
+    const char *message = "Hello, DSA test message.";
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*)message, strlen(message), hash);
+    
+    return DSA_verify(0, hash, SHA256_DIGEST_LENGTH, signature, sig_len, dsa);
+}
+
+// Benchmark complet
+void benchmark_dsa() {
+    DSA_Performance perf;
+    clock_t start, end;
+
+    // Mesure du temps de setup
+    start = clock();
+    DSA_Keys keys = setup_dsa();
+    end = clock();
+    perf.setup_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Mesure du temps de signature
+    unsigned int sig_len;
+    start = clock();
+    unsigned char *signature = dsa_sign(keys.dsa, &sig_len);
+    end = clock();
+    perf.sign_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Mesure du temps de vérification
+    start = clock();
+    perf.verify_result = dsa_verify(keys.dsa, signature, sig_len);
+    end = clock();
+    perf.verify_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Affichage des performances
+    printf("DSA Setup: %.6f\n", perf.setup_time);
+    printf("DSA Sign: %.6f\n", perf.sign_time);
+    printf("DSA Verify: %.6f\n", perf.verify_time);
+
+    free(signature);
+    DSA_free(keys.dsa);
+}
+

@@ -9,8 +9,9 @@
 #include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
 #include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
 
-
-int rsa_sign();  // Déclaration de la fonction
-int rsa_verify(RSA *rsa, const char *message, unsigned char *signature, unsigned int sig_len);
+void setup_rsa(); 
+int rsa_sign();
+int rsa_verify(RSA *rsa, unsigned char *signature, unsigned int sig_len);
+void benchmark_rsa();
 
 #endif

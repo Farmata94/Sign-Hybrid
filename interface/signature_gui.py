@@ -1,7 +1,9 @@
 import sys
 import subprocess
 import time  
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox,QTableWidget,QTableWidgetItem
+import os
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem
+
 class SignatureApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -36,29 +38,31 @@ class SignatureApp(QWidget):
 
         # Button sign
         self.sign_button = QPushButton("Hybrid Sign a file", self)
-        self.sign_button.clicked.connect(self.sign_document)  # Lancer la signature
+        self.sign_button.clicked.connect(self.sign_document)
         layout.addWidget(self.sign_button)
 
-        # Button verify
-        self.verify_button = QPushButton("Verify the signature", self)
-        self.verify_button.clicked.connect(self.verify_document)  
+        # Button for verification
+        self.verify_button = QPushButton("Verify Hybrid Signature", self)
+        self.verify_button.clicked.connect(self.verify_signature)
         layout.addWidget(self.verify_button)
 
+
+        # Table for benchmark results
         self.table = QTableWidget(self)
         self.table.setColumnCount(2)
         self.table.setHorizontalHeaderLabels(["Algorithm", "Time (s)"])
         layout.addWidget(self.table)
 
-
         self.setLayout(layout)
         self.setWindowTitle("Hybrid Signature")
-        self.resize(400, 250)
+        self.resize(400, 300)
 
         self.file_path = None  
+        self.signed_file_path = None
 
     def import_document(self):
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self, "Import a document", "", "All Files (*);;Text Files (*.txt)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Import a document", "", "All Files (*)", options=options)
         if file_name:
             self.file_path = file_name
             self.file_label.setText(f"Selected: {file_name}")
@@ -71,66 +75,61 @@ class SignatureApp(QWidget):
         traditional_algo = self.traditional_combo.currentText()
         hybrid_algo = self.hybrid_combo.currentText()
 
-        # Mapping des noms pour l'exécutable C
-        algo_mapping = {
-            "RSA": "RSA",
-            "DSA": "DSA",
-            "ECDSA": "ECDSA",
-            "Dilithium": "Dilithium",
-            "Falcon": "Falcon",
-            "Phinics":"Phinics"
-        }
-
-        trad_algo_c = algo_mapping[traditional_algo]
-        hybrid_algo_c = algo_mapping[hybrid_algo]
-
         output_file = self.file_path + ".signed"
         self.signed_file_path = output_file
 
-        command = ["./hybrid_signature", self.file_path, trad_algo_c, hybrid_algo_c, output_file]
+        command = ["./hybrid_signature", self.file_path, traditional_algo, hybrid_algo, output_file]
+        
         try:
             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
             output = result.stdout.strip().split("\n")
 
-            times = {}
+            # Parsing des temps d'exécution
+            times = []
             for line in output:
-                try:
-                    algo, time_str = line.split(": ")
-                    times[algo] = float(time_str)
-                except ValueError:
-                    continue  # Ignore lines that don't match the expected format
+                parts = line.split(": ")
+                if len(parts) == 2:
+                    algo, time_str = parts
+                    try:
+                        times.append((algo, float(time_str)))
+                    except ValueError:
+                        continue  # Ignore erreurs de conversion
 
             self.update_table(times)
-
-        except subprocess.CalledProcessError:
-            QMessageBox.critical(self, "Error", "Signature process failed!")
-
-    def verify_document(self):
-        if not self.signed_file_path:
-            QMessageBox.warning(self, "Error", "Please import a signed file first!")
-            return
-
-        # Exécuter le programme C pour vérifier la signature hybride
-        command = ["./hybrid_verify", self.signed_file_path]
-        try:
-            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
-            output = result.stdout.strip().split("\n")
-
-            # Affichage des résultats dans l'interface
-            for line in output:
-                print(line)  # Optionnel, pour afficher les résultats dans la console
-
-            # Afficher un message de succès ou d'erreur selon la sortie
-            QMessageBox.information(self, "Verification Result", "\n".join(output))
-
-        except subprocess.CalledProcessError:
-            QMessageBox.critical(self, "Error", "Verification process failed!")
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Error", f"Signature process failed!\n{e.stderr}")
 
     def update_table(self, times):
         self.table.setRowCount(len(times))
-        for i, (algo, time) in enumerate(times.items()):
-            self.table.setItem(i, 0, QTableWidgetItem(algo))
-            self.table.setItem(i, 1, QTableWidgetItem(f"{time:.6f}"))
+        
+        for row, (algo, time) in enumerate(times):
+            self.table.setItem(row, 0, QTableWidgetItem(algo))
+            self.table.setItem(row, 1, QTableWidgetItem(f"{time:.6f} s"))
+    
+    def verify_signature(self):
+        if not self.signed_file_path:
+            QMessageBox.warning(self, "Error", "Please sign a file first!")
+            return
+
+        traditional_algo = self.traditional_combo.currentText()
+        hybrid_algo = self.hybrid_combo.currentText()
+        if not os.path.exists(self.signed_file_path):        
+            QMessageBox.critical(self, "Error", "The signed file does not exist. Please check the signing process.")
+            return
+    
+        # Suppose the verification is done with the same executable, passing the signed file path and algorithms
+        command = ["./hybrid_verify", self.signed_file_path, traditional_algo, hybrid_algo]
+
+        try:
+            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+            output = result.stdout.strip()
+
+            # Display the result of verification
+            QMessageBox.information(self, "Verification Result", output)
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Error", f"Verification process failed!")
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

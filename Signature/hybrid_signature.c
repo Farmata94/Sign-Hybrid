@@ -42,28 +42,28 @@ int main(int argc, char *argv[]) {
     unsigned char *message, *trad_signature = NULL, *hybrid_signature = NULL;
     size_t message_len, hybrid_sig_len;
     unsigned int trad_sig_len;
-    double trad_time = 0, hybrid_time = 0, total_time = 0;
+    double total_time = 0;
     
     if (read_file(file_path, &message, &message_len)) return 1;
 
     // Trad sign
-    clock_t start_trad = clock();
+
     if (strcmp(trad_algo, "DSA") == 0) {
-        dsa_sign(message, message_len, &trad_signature, &trad_sig_len);
+       benchmark_dsa(message, message_len, &trad_signature, &trad_sig_len);
     } else if (strcmp(trad_algo, "RSA") == 0) {
-        rsa_sign(message, message_len, &trad_signature, &trad_sig_len);
+        benchmark_rsa(message, message_len, &trad_signature, &trad_sig_len);
     } else if (strcmp(trad_algo, "ECDSA") == 0) {
-        ecdsa_sign(message, message_len, &trad_signature, &trad_sig_len);
+        benchmark_ecdsa(message, message_len, &trad_signature, &trad_sig_len);
     } else {
         fprintf(stderr, "Algorithme traditionnel inconnu : %s\n", trad_algo);
         return 1;
     }
-    trad_time = (double)(clock() - start_trad) / CLOCKS_PER_SEC;
+
 
     // Post-quantique Sign
-    clock_t start_hybrid = clock();
+
     if (strcmp(hybrid_algo, "Dilithium") == 0) {
-        dilithium_sign(message, message_len, &hybrid_signature, &hybrid_sig_len);
+        benchmark_dilithium(message, message_len, &hybrid_signature, &hybrid_sig_len);
     // } else if (strcmp(hybrid_algo, "Falcon") == 0) {
     //     falcon_sign(message, message_len, &hybrid_signature, &hybrid_sig_len);
     // } else if (strcmp(hybrid_algo, "Phinics") == 0) {
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Algorithme hybride inconnu : %s\n", hybrid_algo);
         return 1;
     }
-    hybrid_time = (double)(clock() - start_hybrid) / CLOCKS_PER_SEC;
+   
 
     // Sign hybride
     clock_t start_total = clock();
@@ -84,8 +84,6 @@ int main(int argc, char *argv[]) {
     fclose(out);
     total_time = (double)(clock() - start_total) / CLOCKS_PER_SEC;
 
-    printf("%s: %.6f\n", trad_algo, trad_time);
-    printf("%s: %.6f\n", hybrid_algo, hybrid_time);
     printf("Hybrid: %.6f\n", total_time);
 
     free(message);
