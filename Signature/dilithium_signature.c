@@ -51,15 +51,6 @@ int dilithium_verify(const uint8_t *signature, size_t signature_len, const uint8
 }
 
 
-/* Fonction pour afficher la signature en hexadécimal */
-void print_signature(const uint8_t *signature, size_t signature_len) {
-    printf("Signature : ");
-    for (size_t i = 0; i < signature_len; i++) {
-        printf("%02x", signature[i]);
-    }
-    printf("\n");
-}
-
 /* Fonction pour benchmarker la génération, la signature et la vérification */
 void benchmark_dilithium() {
     Dilithium_Performance perf;
@@ -72,6 +63,7 @@ void benchmark_dilithium() {
     size_t signature_len;
     const char *message = "Hello, Dilithium!";
     size_t message_len = strlen(message);
+    
 
     /* Benchmark génération de clé */
     start = clock();
@@ -79,23 +71,21 @@ void benchmark_dilithium() {
     end = clock();
     perf.setup_time = ((double) (end - start)) / CLOCKS_PER_SEC;
     
-
     /* Benchmark signature */
     start = clock();
     if (!dilithium_sign((const uint8_t *)message, message_len, signature, &signature_len, secret_key)) return;
     end = clock();
     perf.sign_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    
 
-    /* Affichage de la signature */
-    print_signature(signature, signature_len);
+  
 
     /* Benchmark vérification */
     start = clock();
     dilithium_verify(signature, signature_len, (const uint8_t *)message, message_len, public_key);
     end = clock();
     perf.verify_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    
+
+
 
     printf("Dilithium Setup: %.6f\n", perf.setup_time);
     printf("Dilithium Sign: %.6f\n", perf.sign_time);
