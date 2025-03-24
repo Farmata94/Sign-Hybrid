@@ -9,7 +9,7 @@
 #include <openssl/err.h>    // Pour gérer les erreurs OpenSSL
 #include <openssl/pem.h>    // Pour écrire/charger les clés au format PEM
 
-void generate_ecdsa_key();
+int generate_ecdsa_key();
 int ecdsa_sign() ;
 int ecdsa_verify(EC_KEY *ec_key, const char *message, unsigned char *signature, unsigned int sig_len) ;
 void benchmark_ecdsa();

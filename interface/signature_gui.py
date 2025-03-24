@@ -1,8 +1,11 @@
 import sys
 import subprocess
-import time
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, 
+                             QComboBox, QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, 
+                             QTabWidget, QHBoxLayout, QFrame)
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import Qt
 
 class SignatureApp(QWidget):
     def __init__(self):
@@ -10,70 +13,127 @@ class SignatureApp(QWidget):
         self.initUI()
 
     def initUI(self):
+        # 🟢 Ajout de l'onglet principal
         layout = QVBoxLayout()
+        self.tabs = QTabWidget(self)
 
-        # Import file
-        self.import_button = QPushButton("Import a file", self)
+        # 🟡 Onglet 1 : Signature
+        self.signature_tab = QWidget()
+        self.setup_signature_tab()
+        self.tabs.addTab(self.signature_tab, "🔏 Signature")
+
+        # 🟡 Onglet 2 : Vérification
+        self.verify_tab = QWidget()
+        self.setup_verification_tab()
+        self.tabs.addTab(self.verify_tab, "✔️ Vérification")
+
+        # 🟡 Onglet 3 : Résultats Expérimentaux
+        self.results_tab = QWidget()
+        self.setup_results_tab()
+        self.tabs.addTab(self.results_tab, "📊 Résultats")
+
+        layout.addWidget(self.tabs)
+        self.setLayout(layout)
+
+        # 🌟 Ajout d'un titre et description
+        title = QLabel(" Hybrid Digital Signature Tool", self)
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #2E86C1; text-align: center;")
+        layout.insertWidget(0, title)
+
+        description = QLabel("This tool allows you to sign and verify files using hybrid digital signatures.\n"
+                             "Choose a traditional and a post-quantum algorithm, sign your file, and verify it.", self)
+        description.setAlignment(Qt.AlignCenter)
+        layout.insertWidget(1, description)
+
+        self.setWindowTitle("Hybrid Signature System")
+        self.resize(700, 500)
+
+    # Signature
+    def setup_signature_tab(self):
+        layout = QVBoxLayout()
+        
+
+        icon_label = QLabel(self)
+        pixmap = QPixmap("icons/contract.png") 
+        icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
+        layout.addWidget(icon_label, alignment=Qt.AlignCenter)
+
+
+        self.import_button = QPushButton("📂 Import a File", self)
+        self.import_button.setStyleSheet("background-color: #5DADE2; color: white; padding: 5px;")
         self.import_button.clicked.connect(self.import_document)
         layout.addWidget(self.import_button)
 
         self.file_label = QLabel("No file selected", self)
         layout.addWidget(self.file_label)
 
-        # Security Level Selection
-        self.security_label = QLabel("Select Security Level:")
+        # Level security
+        self.security_label = QLabel("🔒 Security Level:")
         layout.addWidget(self.security_label)
-
         self.security_combo = QComboBox(self)
         self.security_combo.addItems(["2 (Standard)", "3 (High)", "5 (Highest)"])
         layout.addWidget(self.security_combo)
 
-        # Select Traditional sign
-        self.traditional_label = QLabel("Select the traditional signature algorithm:")
-        layout.addWidget(self.traditional_label)
-
+        # Select algo
         self.traditional_combo = QComboBox(self)
         self.traditional_combo.addItems(["RSA", "DSA", "ECDSA"])
+        layout.addWidget(QLabel("📝 Traditional Algorithm:"))
         layout.addWidget(self.traditional_combo)
-
-        # Select post-quantum sign
-        self.hybrid_label = QLabel("Select the post-quantum signature algorithm:")
-        layout.addWidget(self.hybrid_label)
 
         self.hybrid_combo = QComboBox(self)
         self.hybrid_combo.addItems(["Dilithium", "Falcon", "Phinics"])
+        layout.addWidget(QLabel("🛡 Post-Quantum Algorithm:"))
         layout.addWidget(self.hybrid_combo)
 
-        # Button sign
-        self.sign_button = QPushButton("Hybrid Sign a file", self)
+    
+        self.sign_button = QPushButton("✍️ Hybrid Sign", self)
+        self.sign_button.setStyleSheet("background-color: #58D68D; color: white; padding: 5px;")
         self.sign_button.clicked.connect(self.sign_document)
         layout.addWidget(self.sign_button)
 
-        # Button for verification
-        self.verify_button = QPushButton("Verify Hybrid Signature", self)
+        self.signature_tab.setLayout(layout)
+
+    # Vérification
+    def setup_verification_tab(self):
+        layout = QVBoxLayout()
+        
+        icon_label = QLabel(self)
+        pixmap = QPixmap("icons/search.png")  
+        icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
+        layout.addWidget(icon_label, alignment=Qt.AlignCenter)
+
+        # 🔹 Explication de la vérification
+        layout.addWidget(QLabel("🧐 Select a signed file to verify its integrity."))
+
+        # 🔹 Bouton de vérification
+        self.verify_button = QPushButton("🔍 Verify Signature", self)
+        self.verify_button.setStyleSheet("background-color: #EC7063; color: white; padding: 5px;")
         self.verify_button.clicked.connect(self.verify_signature)
         layout.addWidget(self.verify_button)
 
-        # Table for benchmark results with new column structure - updated to use ms
+        self.verify_tab.setLayout(layout)
+
+    #  Résultats Expérimentaux
+    def setup_results_tab(self):
+        layout = QVBoxLayout()
+
+        icon_label = QLabel(self)
+        pixmap = QPixmap("icons/results.png")  
+        icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
+        layout.addWidget(icon_label, alignment=Qt.AlignCenter)
+        
+        # 🔹 Tableau des résultats
         self.table = QTableWidget(self)
         self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels([
-            "Algorithm", "Security Level", 
-            "Setup (ms)", "Sign (ms)", "Verify (ms)",
-            "Total Time (ms)"
-        ])
+        self.table.setHorizontalHeaderLabels(["Algorithm", "Security Level", "Setup (ms)", "Sign (ms)", "Verify (ms)", "Total Time (ms)"])
         layout.addWidget(self.table)
 
-        self.setLayout(layout)
-        self.setWindowTitle("Hybrid Signature")
-        self.resize(600, 400)  # Increased width to accommodate more columns
+        self.results_tab.setLayout(layout)
 
-        self.file_path = None
-        self.signed_file_path = None
 
     def import_document(self):
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self, "Import a document", "", "All Files (*)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Import a Document", "", "All Files (*)", options=options)
         if file_name:
             self.file_path = file_name
             self.file_label.setText(f"Selected: {file_name}")
@@ -103,14 +163,13 @@ class SignatureApp(QWidget):
         output_file = self.file_path + ".signed"
         self.signed_file_path = output_file
 
-        command = ["./hybrid_signature", self.file_path, traditional_algo, hybrid_algo, output_file, "sign"]
+        command = ["./hybrid_signature", self.file_path, traditional_algo, hybrid_algo, output_file]
         
         try:
             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
             output = result.stdout.strip().split("\n")
 
             # Parse timing results according to the format you're using
-            # Format example: "Dilithium Setup: 0.123456"
             traditional_data = {"setup": 0, "sign": 0, "verify": 0}
             hybrid_data = {"setup": 0, "sign": 0, "verify": 0}
             
@@ -168,64 +227,29 @@ class SignatureApp(QWidget):
 
         traditional_algo = self.traditional_combo.currentText()
         hybrid_algo = self.hybrid_combo.currentText()
+
+        if not traditional_algo or not hybrid_algo:
+            QMessageBox.warning(self, "Error", "Please select both algorithms!")
+            return
+
         if not os.path.exists(self.signed_file_path):        
             QMessageBox.critical(self, "Error", "The signed file does not exist. Please check the signing process.")
             return
-    
+
         # Verification command
-        command = ["./hybrid_verify", self.signed_file_path, traditional_algo, hybrid_algo, "verify"]
+        command = ["./hybrid_verify", self.signed_file_path, traditional_algo, hybrid_algo]
 
         try:
             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
             output = result.stdout.strip()
-            
-            # Parse verification results
-            traditional_verify_time = 0
-            hybrid_verify_time = 0
-            traditional_status = "Success"
-            hybrid_status = "Success"
-            
-            for line in output.split("\n"):
-                # Extract verification times and convert to milliseconds
-                if f"{traditional_algo} Verify:" in line:
-                    try:
-                        # Convert from seconds to milliseconds
-                        traditional_verify_time = float(line.split(f"{traditional_algo} Verify:")[1].strip()) * 1000
-                    except (ValueError, IndexError):
-                        pass
-                elif f"{hybrid_algo} Verify:" in line:
-                    try:
-                        # Convert from seconds to milliseconds
-                        hybrid_verify_time = float(line.split(f"{hybrid_algo} Verify:")[1].strip()) * 1000
-                    except (ValueError, IndexError):
-                        pass
-                
-            # Update the table with verification results
-            for row in range(self.table.rowCount()):
-                algo = self.table.item(row, 0).text()
-                if algo == traditional_algo:
-                    self.table.setItem(row, 4, QTableWidgetItem(f"{traditional_verify_time:.2f}"))
-                    self.table.setItem(row, 6, QTableWidgetItem(traditional_status))
-                    
-                    # Recalculate total time
-                    setup_time = float(self.table.item(row, 2).text())
-                    sign_time = float(self.table.item(row, 3).text())
-                    total_time = setup_time + sign_time + traditional_verify_time
-                    self.table.setItem(row, 5, QTableWidgetItem(f"{total_time:.2f}"))
-                    
-                elif algo == hybrid_algo:
-                    self.table.setItem(row, 4, QTableWidgetItem(f"{hybrid_verify_time:.2f}"))
-                    self.table.setItem(row, 6, QTableWidgetItem(hybrid_status))
-                    
-                    # Recalculate total time
-                    setup_time = float(self.table.item(row, 2).text())
-                    sign_time = float(self.table.item(row, 3).text())
-                    total_time = setup_time + sign_time + hybrid_verify_time
-                    self.table.setItem(row, 5, QTableWidgetItem(f"{total_time:.2f}"))
-                
-            QMessageBox.information(self, "Verification Result", "Verification completed. See results in the table.")
+
+            if output:
+                QMessageBox.information(self, "Verification Result", f"Verification completed:\n{output}")
+            else:
+                QMessageBox.warning(self, "Verification Result", "Verification completed but no output received.")
+
         except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Error", f"Verification process failed!")
+            QMessageBox.critical(self, "Error", f"Verification process failed:\n{e.stderr.strip()}")
 
 
 if __name__ == '__main__':

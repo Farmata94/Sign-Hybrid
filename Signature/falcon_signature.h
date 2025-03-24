@@ -10,6 +10,10 @@
 #include "liboqs/build/include/oqs/sig_falcon.h"  // bibliothèque Falcon (libpqcrypto)
 
 
-int falcon_sign(); //Déclaration de la fonction
+int falcon_setup(uint8_t **pk, uint8_t **sk, OQS_SIG **sig);
+int falcon_sign(OQS_SIG *sig, uint8_t *sk, uint8_t *message, size_t message_len, uint8_t *signature, size_t *sig_len);
+int falcon_verify(OQS_SIG *sig, uint8_t *pk, uint8_t *message, size_t message_len, uint8_t *signature, size_t sig_len);
+
+
 
 #endif

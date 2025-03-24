@@ -5,7 +5,6 @@
 #include "dilithium/ref/api.h"  // Inclut l'API de l'implémentation de référence
 #include "dilithium/ref/params.h"
 
-
 typedef struct {
     double setup_time;
     double sign_time;
@@ -50,45 +49,39 @@ int dilithium_verify(const uint8_t *signature, size_t signature_len, const uint8
     return 1;
 }
 
-
 /* Fonction pour benchmarker la génération, la signature et la vérification */
-void benchmark_dilithium() {
+int benchmark_dilithium(void) {
     Dilithium_Performance perf;
     clock_t start, end;
-
 
     uint8_t public_key[CRYPTO_PUBLICKEYBYTES];
     uint8_t secret_key[CRYPTO_SECRETKEYBYTES];
     uint8_t signature[CRYPTO_BYTES];
-    size_t signature_len;
+    size_t signature_len = CRYPTO_BYTES;
     const char *message = "Hello, Dilithium!";
     size_t message_len = strlen(message);
-    
 
     /* Benchmark génération de clé */
     start = clock();
-    if (!generate_dilithium_keypair(public_key, secret_key)) return;
+    if (!generate_dilithium_keypair(public_key, secret_key)) return 1;
     end = clock();
     perf.setup_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    
+
     /* Benchmark signature */
     start = clock();
-    if (!dilithium_sign((const uint8_t *)message, message_len, signature, &signature_len, secret_key)) return;
+    if (!dilithium_sign((const uint8_t *)message, message_len, signature, &signature_len, secret_key)) return 1;
     end = clock();
     perf.sign_time = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-  
-
     /* Benchmark vérification */
     start = clock();
-    dilithium_verify(signature, signature_len, (const uint8_t *)message, message_len, public_key);
+    if (!dilithium_verify(signature, signature_len, (const uint8_t *)message, message_len, public_key)) return 1;
     end = clock();
     perf.verify_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-
-
 
     printf("Dilithium Setup: %.6f\n", perf.setup_time);
     printf("Dilithium Sign: %.6f\n", perf.sign_time);
     printf("Dilithium Verify: %.6f\n", perf.verify_time);
-}
 
+    return 0;
+}
