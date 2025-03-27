@@ -103,7 +103,7 @@ class SignatureApp(QWidget):
         layout.addWidget(icon_label, alignment=Qt.AlignCenter)
 
         # 🔹 Explication de la vérification
-        layout.addWidget(QLabel("🧐 Select a signed file to verify its integrity."))
+        layout.addWidget(QLabel("🧐 Verify your signature"))
 
         # 🔹 Bouton de vérification
         self.verify_button = QPushButton("🔍 Verify Signature", self)
@@ -141,7 +141,7 @@ class SignatureApp(QWidget):
     def is_valid_combination(self, traditional_algo, hybrid_algo, security_level):
         """ Vérifie si la combinaison est autorisée au niveau de sécurité sélectionné. """
         valid_combinations = {
-            "2 (Standard)": [("DSA", "Dilithium"), ("RSA", "Falcon")],
+            "2 (Standard)": [("DSA", "Dilithium"), ("RSA", "Falcon"),("RSA", "Dilithium")],
             "3 (High)": [("ECDSA", "Dilithium"), ("DSA", "Phinics")],
             "5 (Highest)": [("RSA", "Phinics"), ("ECDSA", "Falcon")]
         }
@@ -221,35 +221,34 @@ class SignatureApp(QWidget):
             
 
     def verify_signature(self):
-        if not self.signed_file_path:
+        if not hasattr(self, "signed_file_path") or not self.signed_file_path:
             QMessageBox.warning(self, "Error", "Please sign a file first!")
             return
 
         traditional_algo = self.traditional_combo.currentText()
         hybrid_algo = self.hybrid_combo.currentText()
+        output_file = self.file_path + ".signed"
 
         if not traditional_algo or not hybrid_algo:
             QMessageBox.warning(self, "Error", "Please select both algorithms!")
             return
 
-        if not os.path.exists(self.signed_file_path):        
+        if not os.path.exists(self.signed_file_path):
             QMessageBox.critical(self, "Error", "The signed file does not exist. Please check the signing process.")
             return
 
-        # Verification command
-        command = ["./hybrid_verify", self.signed_file_path, traditional_algo, hybrid_algo]
-
         try:
-            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
-            output = result.stdout.strip()
+            # Appel direct de la fonction verify de hybrid_sign
+            verification_result = ["./hybrid_signature", self.file_path, traditional_algo, hybrid_algo, output_file]
 
-            if output:
-                QMessageBox.information(self, "Verification Result", f"Verification completed:\n{output}")
+            if verification_result:
+                QMessageBox.information(self, "Verification Result", f"Verification Successful")
             else:
-                QMessageBox.warning(self, "Verification Result", "Verification completed but no output received.")
+                QMessageBox.warning(self, "Verification Result", "Verification failed!")
 
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Error", f"Verification process failed:\n{e.stderr.strip()}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Verification process failed:\n{str(e)}")
+
 
 
 if __name__ == '__main__':

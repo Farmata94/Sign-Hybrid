@@ -53,7 +53,7 @@ int rsa_verify(RSA *rsa, unsigned char *signature, unsigned int sig_len) {
 }
 
 // Benchmark complet
-void benchmark_rsa() {
+int benchmark_rsa(void) {
     RSA_Performance perf;
     clock_t start, end;
 

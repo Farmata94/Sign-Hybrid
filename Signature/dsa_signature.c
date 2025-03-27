@@ -51,7 +51,7 @@ int dsa_verify(DSA *dsa, unsigned char *signature, unsigned int sig_len) {
 }
 
 // Benchmark complet
-void benchmark_dsa() {
+int benchmark_dsa(void) {
     DSA_Performance perf;
     clock_t start, end;
 
