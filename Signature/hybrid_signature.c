@@ -5,9 +5,11 @@
 #include "dsa_signature.h"
 #include "rsa_sign.h"
 #include "ecdsa_sign.h"
+#include "falcon_signature.h"
 #include "dilithium_signature.h"
 #include "dilithium/ref/api.h"
 #include "dilithium/ref/params.h"
+#include "liboqs/build/include/oqs/oqs.h"
 
 // Fonction pour lire un fichier
 int read_file(const char *filename, unsigned char **buffer, size_t *length) {
@@ -27,10 +29,13 @@ int read_file(const char *filename, unsigned char **buffer, size_t *length) {
         fclose(file);
         return -1;
     }
-
-    fread(*buffer, 1, *length, file);
-    fclose(file);
-    return 0;
+    size_t bytesRead = fread(*buffer, 1, *length, file);
+    if (bytesRead != *length) {
+        fprintf(stderr, "Erreur : lecture incomplète de %s\n", filename);
+        free(*buffer);
+        fclose(file);
+        return -1;
+    }
 }
 
 // Fonction de signature hybride
@@ -61,6 +66,8 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     // Signature post-quantique
     if (strcmp(hybrid_algo, "Dilithium") == 0) {
         benchmark_dilithium(message, message_len, &hybrid_signature, &hybrid_sig_len);
+    }else if (strcmp(hybrid_algo, "Falcon") == 0) {
+        benchmark_falcon(message, message_len, &hybrid_signature, &hybrid_sig_len);
     } else {
         fprintf(stderr, "Algorithme hybride inconnu : %s\n", hybrid_algo);
         free(message);
@@ -86,8 +93,8 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     fwrite(&hybrid_sig_len_32, sizeof(uint32_t), 1, out);
     fwrite(hybrid_signature, 1, hybrid_sig_len, out);
 
-    printf("✅ Signature écrite avec succès : trad=%u, hybrid=%zu\n", trad_sig_len, hybrid_sig_len);
-    printf("⏱️ Temps total de signature : %.6f sec\n", total_time);
+    printf("✅ Succès : trad=%u, hybrid=%zu\n", trad_sig_len, hybrid_sig_len);
+    printf("⏱️ Total time : %.6f sec\n", total_time);
 
     fclose(out);
     free(message);

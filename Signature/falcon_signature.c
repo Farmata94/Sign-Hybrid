@@ -1,97 +1,105 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <time.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
 #include "liboqs/build/include/oqs/oqs.h"
 
-#define SIG_SIZE 1024  // Taille de la signature (Falcon-512)
+// Structure pour stocker les résultats
+typedef struct {
+    double setup_time;
+    double sign_time;
+    double verify_time;
+    int verify_result;
+} Falcon_Performance;
 
-// Fonction pour générer les clés
-int falcon_setup(uint8_t **pk, uint8_t **sk, OQS_SIG **sig) {
-    *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
-    if (!(*sig)) {
-        fprintf(stderr, "Erreur : Impossible d'initialiser Falcon\n");
-        return 1;
+// Fonction de génération de clés
+int generate_falcon_keypair(uint8_t **public_key, size_t *public_key_len, uint8_t **secret_key, size_t *secret_key_len) {
+    OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
+    if (!sig) {
+        fprintf(stderr, "Erreur lors de l'initialisation de Falcon-512\n");
+        return 0;
     }
-
-    *pk = malloc((*sig)->length_public_key);
-    *sk = malloc((*sig)->length_secret_key);
-    if (!(*pk) || !(*sk)) {
+    *public_key = malloc(sig->length_public_key);
+    *secret_key = malloc(sig->length_secret_key);
+    if (!*public_key || !*secret_key) {
         fprintf(stderr, "Erreur d'allocation mémoire\n");
-        return 1;
+        return 0;
     }
-
-    if (OQS_SIG_keypair(*sig, *pk, *sk) != OQS_SUCCESS) {
-        fprintf(stderr, "Erreur lors de la génération des clés\n");
-        return 1;
+    if (OQS_SIG_keypair(sig, *public_key, *secret_key) != OQS_SUCCESS) {
+        fprintf(stderr, "Erreur lors de la génération des clés Falcon\n");
+        return 0;
     }
-    return 0;
-}
-
-// Fonction pour signer un message
-int falcon_sign(OQS_SIG *sig, uint8_t *sk, uint8_t *message, size_t message_len, uint8_t *signature, size_t *sig_len) {
-    if (OQS_SIG_sign(sig, signature, sig_len, message, message_len, sk) != OQS_SUCCESS) {
-        fprintf(stderr, "Erreur : La signature a échoué\n");
-        return 1;
-    }
-    return 0;
-}
-
-// Fonction pour vérifier une signature
-int falcon_verify(OQS_SIG *sig, uint8_t *pk, uint8_t *message, size_t message_len, uint8_t *signature, size_t sig_len) {
-    if (OQS_SIG_verify(sig, message, message_len, signature, sig_len, pk) != OQS_SUCCESS) {
-        printf("Signature invalide !\n");
-        return 1;
-    }
-    printf("Signature valide !\n");
-    return 0;
-}
-
-int main() {
-    clock_t start, end;
-    double time_gen_keys, time_sign, time_verify;
-
-    OQS_SIG *sig;
-    uint8_t *pk, *sk;
-    uint8_t message[] = "Test message for Falcon-512 signature.";
-    size_t message_len = strlen((char *)message);
-    uint8_t signature[SIG_SIZE];
-    size_t sig_len = SIG_SIZE;
-
-    // Mesure du temps de génération des clés
-    start = clock();
-    if (falcon_setup(&pk, &sk, &sig) != 0) {
-        return 1;
-    }
-    end = clock();
-    time_gen_keys = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
-    printf("Falcon Setup : %.2f ms\n", time_gen_keys);
-
-    // Mesure du temps de signature
-    start = clock();
-    if (falcon_sign(sig, sk, message, message_len, signature, &sig_len) != 0) {
-        return 1;
-    }
-    end = clock();
-    time_sign = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
-    printf("Falcon Sign : %.2f ms\n", time_sign);
-
-    // Mesure du temps de vérification
-    start = clock();
-    if (falcon_verify(sig, pk, message, message_len, signature, sig_len) != 0) {
-        return 1;
-    }
-    end = clock();
-    time_verify = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
-    printf("Falcon Verify : %.2f ms\n", time_verify);
-
-    // Libération de la mémoire
+    printf("Clés Falcon générées avec succès.\n");
     OQS_SIG_free(sig);
-    free(pk);
-    free(sk);
+    return 1;
+}
+
+// Fonction de signature
+int falcon_sign(const uint8_t *message, size_t message_len, uint8_t **signature, size_t *signature_len, const uint8_t *secret_key, size_t secret_key_len) {
+    OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
+    if (!sig) return 0;
+    *signature = malloc(sig->length_signature);
+    if (!*signature) return 0;
+    if (OQS_SIG_sign(sig, *signature, signature_len, message, message_len, secret_key) != OQS_SUCCESS) {
+        fprintf(stderr, "Erreur lors de la signature Falcon\n");
+        return 0;
+    }
+    printf("Message signé avec succès.\n");
+    OQS_SIG_free(sig);
+    return 1;
+}
+
+// Fonction de vérification
+int falcon_verify(const uint8_t *signature, size_t signature_len, const uint8_t *message, size_t message_len, const uint8_t *public_key, size_t public_key_len) {
+    OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
+    if (!sig) return 0;
+    int result = OQS_SIG_verify(sig, message, message_len, signature, signature_len, public_key) == OQS_SUCCESS;
+    printf("Signature Falcon %s.\n", result ? "valide" : "invalide");
+    OQS_SIG_free(sig);
+    return result;
+}
+
+// Fonction de benchmark
+int benchmark_falcon(void) {
+    Falcon_Performance perf;
+    clock_t start, end;
+
+    uint8_t *public_key = NULL, *secret_key = NULL;
+    size_t public_key_len, secret_key_len;
+    uint8_t *signature = NULL;
+    size_t signature_len;
+    const char *message = "Hello, Falcon!";
+    size_t message_len = strlen(message);
+
+    // Benchmark génération de clé
+    start = clock();
+    if (!generate_falcon_keypair(&public_key, &public_key_len, &secret_key, &secret_key_len)) return 1;
+    end = clock();
+    perf.setup_time = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    // Benchmark signature
+    start = clock();
+    if (!falcon_sign((const uint8_t *)message, message_len, &signature, &signature_len, secret_key, secret_key_len)) return 1;
+    end = clock();
+    perf.sign_time = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    // Benchmark vérification
+    start = clock();
+    perf.verify_result = falcon_verify(signature, signature_len, (const uint8_t *)message, message_len, public_key, public_key_len);
+    end = clock();
+    perf.verify_time = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    // Affichage des performances
+    printf("Falcon Setup: %.6f sec\n", perf.setup_time);
+    printf("Falcon Sign: %.6f sec\n", perf.sign_time);
+    printf("Falcon Verify: %.6f sec\n", perf.verify_time);
+
+    // Libération mémoire
+    free(public_key);
+    free(secret_key);
+    free(signature);
 
     return 0;
 }
+
+

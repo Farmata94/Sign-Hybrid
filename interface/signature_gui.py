@@ -168,12 +168,13 @@ class SignatureApp(QWidget):
         try:
             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
             output = result.stdout.strip().split("\n")
-
+            print("Raw Output:", output)  
             # Parse timing results according to the format you're using
             traditional_data = {"setup": 0, "sign": 0, "verify": 0}
             hybrid_data = {"setup": 0, "sign": 0, "verify": 0}
             
             for line in output:
+                print(f"Processing line: {line}") 
                 # Parse lines like "Dilithium Setup: 0.123456" or "RSA Setup: 0.123456"
                 for algo in [traditional_algo, hybrid_algo]:
                     for phase in ["Setup", "Sign", "Verify"]:
