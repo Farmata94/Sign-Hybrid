@@ -181,7 +181,7 @@ class SignatureApp(QWidget):
                         prefix = f"{algo} {phase}:"
                         if prefix in line:
                             try:
-                                # Convert from seconds to milliseconds (multiply by 1000)
+                                # Convert from seconds to milliseconds 
                                 time_value = float(line.split(prefix)[1].strip()) * 1000
                                 if algo == traditional_algo:
                                     traditional_data[phase.lower()] = time_value
