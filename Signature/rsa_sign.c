@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h> 
+#include "timing.h"
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/sha.h>
 #include <openssl/err.h>
 #include <time.h>
 
-// Structure pour stocker les clés
+
 typedef struct {
     RSA *rsa;
     BIGNUM *e;
 } RSA_Keys;
 
-// Structure pour stocker les résultats
+
 typedef struct {
     double setup_time;
     double sign_time;
@@ -21,7 +23,7 @@ typedef struct {
     int verify_result;
 } RSA_Performance;
 
-// Génération des clés RSA
+// Generate keys
 RSA_Keys setup_rsa() {
     RSA *rsa = RSA_new();
     BIGNUM *e = BN_new();
@@ -31,7 +33,7 @@ RSA_Keys setup_rsa() {
     return (RSA_Keys){rsa, e};
 }
 
-// Signature d'un message
+// Sign
 unsigned char* rsa_sign(RSA *rsa, unsigned int *sig_len) {
     const char *message = "Hello, RSA test message.";
     unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -43,7 +45,7 @@ unsigned char* rsa_sign(RSA *rsa, unsigned int *sig_len) {
     return signature;
 }
 
-// Vérification d'une signature
+// Verify
 int rsa_verify(RSA *rsa, unsigned char *signature, unsigned int sig_len) {
     const char *message = "Hello, RSA test message.";
     unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -52,31 +54,34 @@ int rsa_verify(RSA *rsa, unsigned char *signature, unsigned int sig_len) {
     return RSA_verify(NID_sha256, hash, SHA256_DIGEST_LENGTH, signature, sig_len, rsa);
 }
 
-// Benchmark complet
+
+
 int benchmark_rsa(void) {
     RSA_Performance perf;
-    clock_t start, end;
+    LARGE_INTEGER freq, start, end;
+    QueryPerformanceFrequency(&freq);  
 
-    // Mesure du temps de setup
-    start = clock();
+
+    
+    QueryPerformanceCounter(&start);
     RSA_Keys keys = setup_rsa();
-    end = clock();
-    perf.setup_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.setup_time = get_elapsed_time(start, end, freq);
 
-    // Mesure du temps de signature
+
     unsigned int sig_len;
-    start = clock();
+    QueryPerformanceCounter(&start);
     unsigned char *signature = rsa_sign(keys.rsa, &sig_len);
-    end = clock();
-    perf.sign_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.sign_time = get_elapsed_time(start, end, freq);
 
-    // Mesure du temps de vérification
-    start = clock();
+ 
+    QueryPerformanceCounter(&start);
     perf.verify_result = rsa_verify(keys.rsa, signature, sig_len);
-    end = clock();
-    perf.verify_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.verify_time = get_elapsed_time(start, end, freq);
 
-    // Affichage des performances
+
     printf("RSA Setup: %.6f\n", perf.setup_time);
     printf("RSA Sign: %.6f\n", perf.sign_time);
     printf("RSA Verify: %.6f\n", perf.verify_time);

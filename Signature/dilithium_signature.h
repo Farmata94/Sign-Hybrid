@@ -11,6 +11,7 @@ int generate_dilithium_keypair();
 int dilithium_sign();
 int dilithium_verify(const uint8_t *signature, size_t signature_len, const uint8_t *message, size_t message_len, const uint8_t *public_key);
 void benchmark_dilithium();
+
 void save_keys();
 
 

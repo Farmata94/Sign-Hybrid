@@ -11,6 +11,7 @@
 int setup_dsa();  
 int dsa_sign();
 int dsa_verify(DSA *dsa, unsigned char *signature, unsigned int sig_len);
+
 void benchmark_dsa();
 
 #endif

@@ -58,7 +58,7 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     } else if (strcmp(trad_algo, "ECDSA") == 0) {
         benchmark_ecdsa(message, message_len, &trad_signature, &trad_sig_len);
     } else {
-        fprintf(stderr, "Algorithme traditionnel inconnu : %s\n", trad_algo);
+        fprintf(stderr, "Algorithme traditionnel unknown : %s\n", trad_algo);
         free(message);
         return 1;
     }
@@ -69,7 +69,7 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     }else if (strcmp(hybrid_algo, "Falcon") == 0) {
         benchmark_falcon(message, message_len, &hybrid_signature, &hybrid_sig_len);
     } else {
-        fprintf(stderr, "Algorithme hybride inconnu : %s\n", hybrid_algo);
+        fprintf(stderr, "Algorithme hybrid unknown : %s\n", hybrid_algo);
         free(message);
         free(trad_signature);
         return 1;
@@ -80,7 +80,7 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     // Écriture des signatures dans le fichier
     FILE *out = fopen(output_file, "wb");
     if (!out) {
-        fprintf(stderr, "Erreur : impossible d'ouvrir %s en écriture\n", output_file);
+        fprintf(stderr, "Error: unable to open %s in writing\n", output_file);
         free(message);
         free(trad_signature);
         free(hybrid_signature);
@@ -113,6 +113,6 @@ int main(int argc, char *argv[]) {
 
     char *file_path = argv[1], *trad_algo = argv[2], *hybrid_algo = argv[3], *signature_file = argv[4];
     
-    printf("🔐 Signature du fichier en cours...\n");
+    printf("🔐 Signing the current file...\n");
     return sign_hybrid(file_path, trad_algo, hybrid_algo, signature_file);
 }

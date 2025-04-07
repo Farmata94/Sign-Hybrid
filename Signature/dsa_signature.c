@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h> 
 #include <string.h>
+#include "timing.h"
 #include <openssl/dsa.h>
 #include <openssl/pem.h>
 #include <openssl/sha.h>
@@ -50,36 +52,41 @@ int dsa_verify(DSA *dsa, unsigned char *signature, unsigned int sig_len) {
     return DSA_verify(0, hash, SHA256_DIGEST_LENGTH, signature, sig_len, dsa);
 }
 
+
 // Benchmark complet
 int benchmark_dsa(void) {
     DSA_Performance perf;
-    clock_t start, end;
 
-    // Mesure du temps de setup
-    start = clock();
+    LARGE_INTEGER freq, start, end;
+    QueryPerformanceFrequency(&freq);  
+
+    // setup
+    QueryPerformanceCounter(&start);
     DSA_Keys keys = setup_dsa();
-    end = clock();
-    perf.setup_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.setup_time = get_elapsed_time(start, end, freq);
 
-    // Mesure du temps de signature
+    // Sign
     unsigned int sig_len;
-    start = clock();
+    QueryPerformanceCounter(&start);
     unsigned char *signature = dsa_sign(keys.dsa, &sig_len);
-    end = clock();
-    perf.sign_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.sign_time = get_elapsed_time(start, end, freq);
 
-    // Mesure du temps de vérification
-    start = clock();
+    // Verification
+    QueryPerformanceCounter(&start);
     perf.verify_result = dsa_verify(keys.dsa, signature, sig_len);
-    end = clock();
-    perf.verify_time = (double)(end - start) / CLOCKS_PER_SEC;
+    QueryPerformanceCounter(&end);
+    perf.verify_time = get_elapsed_time(start, end, freq);
 
-    // Affichage des performances
-    printf("DSA Setup: %.6f\n", perf.setup_time);
-    printf("DSA Sign: %.6f\n", perf.sign_time);
-    printf("DSA Verify: %.6f\n", perf.verify_time);
+    // Benchmark
+    printf("DSA Setup: %.6f s\n", perf.setup_time);
+    printf("DSA Sign: %.6f s\n", perf.sign_time);
+    printf("DSA Verify: %.6f s\n", perf.verify_time);
 
     free(signature);
     DSA_free(keys.dsa);
+
+    return 0;
 }
 

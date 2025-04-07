@@ -13,29 +13,33 @@ class SignatureApp(QWidget):
         self.initUI()
 
     def initUI(self):
-        # 🟢 Ajout de l'onglet principal
+
         layout = QVBoxLayout()
         self.tabs = QTabWidget(self)
 
-        # 🟡 Onglet 1 : Signature
+        self.combination_tab = QWidget()
+        self.setup_combination_tab()
+        self.tabs.addTab(self.combination_tab, "📘 Combination")
+
+        # 🟡  Signature
         self.signature_tab = QWidget()
         self.setup_signature_tab()
         self.tabs.addTab(self.signature_tab, "🔏 Signature")
 
-        # 🟡 Onglet 2 : Vérification
+        # 🟡 Verification
         self.verify_tab = QWidget()
         self.setup_verification_tab()
-        self.tabs.addTab(self.verify_tab, "✔️ Vérification")
+        self.tabs.addTab(self.verify_tab, "✔️ Verification")
 
-        # 🟡 Onglet 3 : Résultats Expérimentaux
+        # 🟡  Result
         self.results_tab = QWidget()
         self.setup_results_tab()
-        self.tabs.addTab(self.results_tab, "📊 Résultats")
+        self.tabs.addTab(self.results_tab, "📊 Results")
 
         layout.addWidget(self.tabs)
         self.setLayout(layout)
 
-        # 🌟 Ajout d'un titre et description
+        
         title = QLabel(" Hybrid Digital Signature Tool", self)
         title.setStyleSheet("font-size: 18px; font-weight: bold; color: #2E86C1; text-align: center;")
         layout.insertWidget(0, title)
@@ -47,6 +51,36 @@ class SignatureApp(QWidget):
 
         self.setWindowTitle("Hybrid Signature System")
         self.resize(700, 500)
+
+    def setup_combination_tab(self):
+        layout = QVBoxLayout()
+
+        icon_label = QLabel(self)
+        pixmap = QPixmap("icons/contract.png")
+        icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
+        layout.addWidget(icon_label, alignment=Qt.AlignCenter)
+
+        explanation = QLabel(self)
+        explanation.setWordWrap(True)
+        explanation.setText(
+            "<h3>How Hybrid Signature Works</h3>"
+            "<p>This tool combines two digital signatures: one from a traditional algorithm "
+            "(e.g., RSA, DSA, ECDSA) and one from a post-quantum algorithm (e.g., Dilithium, Falcon).</p>"
+            "<p><b>Why?</b> Combining both ensures that even if one algorithm is broken "
+            "in the future (e.g., by quantum computers), the other may still be secure. This offers "
+            "a transition path to post-quantum cryptography while maintaining compatibility.</p>"
+            "<p><b>Steps:</b></p>"
+            "<ol>"
+            "<li>The file is signed using the traditional algorithm.</li>"
+            "<li>The same file is signed again using the post-quantum algorithm.</li>"
+            "<li>Both signatures are bundled together into a single signed file.</li>"
+            "</ol>"
+            "<p>During verification, both signatures are separately verified to ensure the integrity and "
+            "authenticity of the file.</p>"
+        )
+        layout.addWidget(explanation)
+        self.combination_tab.setLayout(layout)
+
 
     # Signature
     def setup_signature_tab(self):
@@ -102,10 +136,9 @@ class SignatureApp(QWidget):
         icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
         layout.addWidget(icon_label, alignment=Qt.AlignCenter)
 
-        # 🔹 Explication de la vérification
         layout.addWidget(QLabel("🧐 Verify your signature"))
 
-        # 🔹 Bouton de vérification
+        # 🔹 Button
         self.verify_button = QPushButton("🔍 Verify Signature", self)
         self.verify_button.setStyleSheet("background-color: #EC7063; color: white; padding: 5px;")
         self.verify_button.clicked.connect(self.verify_signature)
@@ -113,7 +146,7 @@ class SignatureApp(QWidget):
 
         self.verify_tab.setLayout(layout)
 
-    #  Résultats Expérimentaux
+    #  Results
     def setup_results_tab(self):
         layout = QVBoxLayout()
 
@@ -122,7 +155,7 @@ class SignatureApp(QWidget):
         icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
         layout.addWidget(icon_label, alignment=Qt.AlignCenter)
         
-        # 🔹 Tableau des résultats
+        # 🔹 Table of results
         self.table = QTableWidget(self)
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(["Algorithm", "Security Level", "Setup (ms)", "Sign (ms)", "Verify (ms)", "Total Time (ms)"])
@@ -182,7 +215,8 @@ class SignatureApp(QWidget):
                         if prefix in line:
                             try:
                                 # Convert from seconds to milliseconds 
-                                time_value = float(line.split(prefix)[1].strip()) * 1000
+                                time_str = line.split(prefix)[1].strip().split()[0] 
+                                time_value = float(time_str) * 1000
                                 if algo == traditional_algo:
                                     traditional_data[phase.lower()] = time_value
                                 else:
@@ -239,7 +273,6 @@ class SignatureApp(QWidget):
             return
 
         try:
-            # Appel direct de la fonction verify de hybrid_sign
             verification_result = ["./hybrid_signature", self.file_path, traditional_algo, hybrid_algo, output_file]
 
             if verification_result:
