@@ -36,6 +36,8 @@ int read_file(const char *filename, unsigned char **buffer, size_t *length) {
         fclose(file);
         return -1;
     }
+    fclose(file);
+    return 0;    
 }
 
 // Fonction de signature hybride
