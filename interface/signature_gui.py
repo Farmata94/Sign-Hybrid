@@ -85,13 +85,11 @@ class SignatureApp(QWidget):
     # Signature
     def setup_signature_tab(self):
         layout = QVBoxLayout()
-        
 
         icon_label = QLabel(self)
         pixmap = QPixmap("icons/contract.png") 
         icon_label.setPixmap(pixmap.scaled(80, 80, Qt.KeepAspectRatio))
         layout.addWidget(icon_label, alignment=Qt.AlignCenter)
-
 
         self.import_button = QPushButton("📂 Import a File", self)
         self.import_button.setStyleSheet("background-color: #5DADE2; color: white; padding: 5px;")
@@ -115,11 +113,33 @@ class SignatureApp(QWidget):
         layout.addWidget(self.traditional_combo)
 
         self.hybrid_combo = QComboBox(self)
-        self.hybrid_combo.addItems(["Dilithium", "Falcon", "Phinics"])
+        self.hybrid_combo.addItems(["Dilithium", "Falcon"])
         layout.addWidget(QLabel("🛡 Post-Quantum Algorithm:"))
         layout.addWidget(self.hybrid_combo)
 
-    
+        # Info security level
+        self.security_info = QLabel(self)
+        self.security_info.setWordWrap(True)
+        self.security_info.setStyleSheet("color: #555;")
+        self.security_info.setText(
+            "<b>Supported Security Levels:</b><br>"
+            "🔹 RSA: Levels 2 & 3<br>"
+            "🔹 DSA: Levels 2<br>"
+            "🔹 ECDSA: Levels 3 & 5<br>"
+            "🔹 Dilithium: Levels 2 & 3<br>"
+            "🔹 Falcon: Levels 2 & 5"
+        )
+        layout.addWidget(self.security_info)
+
+        self.compatibility_msg = QLabel("")
+        self.compatibility_msg.setStyleSheet("color: gray; font-style: italic;")
+        layout.addWidget(self.compatibility_msg)
+
+        self.traditional_combo.currentTextChanged.connect(self.update_compatibility_message)
+        self.hybrid_combo.currentTextChanged.connect(self.update_compatibility_message)
+        self.security_combo.currentTextChanged.connect(self.update_compatibility_message)
+
+
         self.sign_button = QPushButton("✍️ Hybrid Sign", self)
         self.sign_button.setStyleSheet("background-color: #58D68D; color: white; padding: 5px;")
         self.sign_button.clicked.connect(self.sign_document)
@@ -171,14 +191,44 @@ class SignatureApp(QWidget):
             self.file_path = file_name
             self.file_label.setText(f"Selected: {file_name}")
 
+
+    def update_compatibility_message(self):
+        traditional_algo = self.traditional_combo.currentText()
+        hybrid_algo = self.hybrid_combo.currentText()
+        level = self.security_combo.currentText()
+
+        if self.is_valid_combination(traditional_algo, hybrid_algo, level):
+            self.compatibility_msg.setText("✅ Compatible combination for selected level.")
+            self.compatibility_msg.setStyleSheet("color: green;")
+        else:
+            compatible = self.find_compatible_level(traditional_algo, hybrid_algo)
+            if compatible:
+                self.compatibility_msg.setText(f"⚠️ Not compatible with level {level}. Try level: {compatible}.")
+                self.compatibility_msg.setStyleSheet("color: orange;")
+            else:
+                self.compatibility_msg.setText("❌ No compatible security level for this combination.")
+                self.compatibility_msg.setStyleSheet("color: red;")
+
     def is_valid_combination(self, traditional_algo, hybrid_algo, security_level):
         """ Vérifie si la combinaison est autorisée au niveau de sécurité sélectionné. """
         valid_combinations = {
-            "2 (Standard)": [("DSA", "Dilithium"), ("RSA", "Falcon"),("RSA", "Dilithium")],
-            "3 (High)": [("ECDSA", "Dilithium"), ("DSA", "Phinics")],
-            "5 (Highest)": [("RSA", "Phinics"), ("ECDSA", "Falcon")]
+            "2 (Standard)": [("DSA", "Dilithium"), ("RSA", "Falcon"),("RSA", "Dilithium"),("DSA", "Falcon")],
+            "3 (High)": [("RSA", "Dilithium"),("ECDSA", "Dilithium")],
+            "5 (Highest)": [ ("ECDSA", "Falcon")]
         }
         return (traditional_algo, hybrid_algo) in valid_combinations[security_level]
+    
+    valid_combinations = {
+            "2 (Standard)": [("DSA", "Dilithium"), ("RSA", "Falcon"),("RSA", "Dilithium"),("DSA", "Falcon")],
+            "3 (High)": [("RSA", "Dilithium"),("ECDSA", "Dilithium")],
+            "5 (Highest)": [ ("ECDSA", "Falcon")]
+        }
+    
+    def find_compatible_level(self, traditional_algo, hybrid_algo):
+        for level, pairs in self.valid_combinations.items():
+            if (traditional_algo, hybrid_algo) in pairs:
+                return level
+        return None
 
     def sign_document(self):
         if not self.file_path:
@@ -188,10 +238,6 @@ class SignatureApp(QWidget):
         traditional_algo = self.traditional_combo.currentText()
         hybrid_algo = self.hybrid_combo.currentText()
         security_level = self.security_combo.currentText()
-
-        if not self.is_valid_combination(traditional_algo, hybrid_algo, security_level):
-            QMessageBox.critical(self, "Error", f"Selected algorithms are not supported for {security_level}!")
-            return
 
         output_file = self.file_path + ".signed"
         self.signed_file_path = output_file
