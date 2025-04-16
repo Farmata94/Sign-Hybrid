@@ -73,10 +73,15 @@ From the GUI folder, launch the interface signature_gui.py.
 
 ## How to use
 
-![First you need to import the file that you want signed. Then, choose the security level and finally the signatures in order to proceed with the hybrid signature](icons/signature.png)
+First you need to import the file that you want signed. Then, choose the security level and finally the signatures in order to proceed with the hybrid signature
+![signature](icons/signature.png)
 
-![In the verification section you can check if the file has been signed correctly and in the result section the execution time for each step of the signature.](icons/sections.png)
+In the verification section you can check if the file has been signed correctly and in the result section the execution time for each step of the signature.
+![section](icons/sections.png)
 
+
+## Statistics results
+## Conlcusion
 ## Authors
 
 CISSE Farmata
