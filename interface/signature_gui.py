@@ -3,9 +3,11 @@ import subprocess
 import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, 
                              QComboBox, QFileDialog, QMessageBox, QTableWidget, QTableWidgetItem, 
-                             QTabWidget, QHBoxLayout, QFrame)
+                             QTabWidget, QHBoxLayout, QFrame,QVBoxLayout, QWidget)
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
+
+
 
 class SignatureApp(QWidget):
     def __init__(self):
