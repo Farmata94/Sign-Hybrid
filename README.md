@@ -51,6 +51,7 @@ Clone the necessary libraries in the Signature folder:
 - git clone https://github.com/PQClean/PQClean.git
 - git clone https://github.com/open-quantum-safe/liboqs.git
 - git clone https://github.com/pq-crystals/dilithium.git
+
 You also need the openSSl library
 
 ### Configuration liboqs
@@ -65,7 +66,8 @@ Still in the Signature folder
 
 ### Execution
 Run the compilation command :
-gcc -Wall -Wextra -O2  -I Signature/dilithium/ref  -I Signature/liboqs/build/include  Signature/hybrid_signature.c  Signature/dsa_signature.c  Signature/rsa_sign.c  Signature/ecdsa_sign.c  Signature/dilithium_signature.c Signature/falcon_signature.c  Signature/timing.c  Signature/dilithium/ref/*.c  -L Signature/liboqs/build/lib -loqs -lcrypto -lssl  -o hybrid_signature
+
+- gcc -Wall -Wextra -O2  -I Signature/dilithium/ref  -I Signature/liboqs/build/include  Signature/hybrid_signature.c  Signature/dsa_signature.c  Signature/rsa_sign.c  Signature/ecdsa_sign.c  Signature/dilithium_signature.c Signature/falcon_signature.c  Signature/timing.c  Signature/dilithium/ref/*.c  -L Signature/liboqs/build/lib -loqs -lcrypto -lssl  -o hybrid_signature
 
 ### Launching the application :
 From the GUI folder, launch the interface signature_gui.py.
@@ -81,6 +83,19 @@ In the verification section you can check if the file has been signed correctly 
 
 
 ## Statistics results
+
+Example of the results achieved with our system include:
+
+![section](icons/succes.png)
+we have a file that is signed :
+
+![section](icons/file.png)
+![section](icons/verification.png)
+
+The processing time for each step of the hybrid signature :
+![section](icons/stats.png)
+
+
 ## Conlcusion
 ## Authors
 

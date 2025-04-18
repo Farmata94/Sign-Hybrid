@@ -231,7 +231,7 @@ class SignatureApp(QWidget):
             if (traditional_algo, hybrid_algo) in pairs:
                 return level
         return None
-
+    
     def sign_document(self):
         if not self.file_path:
             QMessageBox.warning(self, "Error", "Please import a file first!")
@@ -252,7 +252,7 @@ class SignatureApp(QWidget):
             print("Raw Output:", output)  
             # Parse timing results according to the format you're using
             traditional_data = {"setup": 0, "sign": 0, "verify": 0}
-            hybrid_data = {"setup": 0, "sign": 0, "verify": 0}
+            hybrid_data = {"setup": 0, "sign": 0, "verify": 0}    
             
             for line in output:
                 print(f"Processing line: {line}") 
@@ -271,13 +271,19 @@ class SignatureApp(QWidget):
                                     hybrid_data[phase.lower()] = time_value
                             except (ValueError, IndexError):
                                 continue
-
-            # Add data to the table
+ 
+            combined_data = {
+                "setup": traditional_data["setup"] + hybrid_data["setup"],
+                "sign": traditional_data["sign"] + hybrid_data["sign"],
+                "verify": traditional_data["verify"] + hybrid_data["verify"]
+            }
+    
             timing_data = [
                 (traditional_algo, traditional_data, security_level),
-                (hybrid_algo, hybrid_data, security_level)
+                (hybrid_algo, hybrid_data, security_level),
+                (f"{traditional_algo} + {hybrid_algo}", combined_data, security_level)  
             ]
-            
+
             self.update_table(timing_data)
             QMessageBox.information(self, "Success", "File signed successfully!")
         except subprocess.CalledProcessError as e:
@@ -299,8 +305,9 @@ class SignatureApp(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem(f"{times.get('setup', 0):.2f}"))
             self.table.setItem(row, 3, QTableWidgetItem(f"{times.get('sign', 0):.2f}"))
             self.table.setItem(row, 4, QTableWidgetItem(f"{times.get('verify', 0):.2f}"))
-            
             self.table.setItem(row, 5, QTableWidgetItem(f"{total_time:.2f}"))
+
+
             
 
     def verify_signature(self):

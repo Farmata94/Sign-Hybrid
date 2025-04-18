@@ -98,6 +98,7 @@ int sign_hybrid(const char *file_path, const char *trad_algo, const char *hybrid
     printf("✅ Succès : trad=%u, hybrid=%zu\n", trad_sig_len, hybrid_sig_len);
     printf("⏱️ Total time : %.6f sec\n", total_time);
 
+
     fclose(out);
     free(message);
     free(trad_signature);
