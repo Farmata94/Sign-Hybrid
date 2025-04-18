@@ -76,24 +76,35 @@ From the GUI folder, launch the interface signature_gui.py.
 ## How to use
 
 First you need to import the file that you want signed. Then, choose the security level and finally the signatures in order to proceed with the hybrid signature
-![signature](icons/signature.png)
+
+<img src="icons/signature.png" alt="description" width="300"/>
+
 
 In the verification section you can check if the file has been signed correctly and in the result section the execution time for each step of the signature.
-![section](icons/sections.png)
+
+<img src="icons/sections.png" alt="description" width="300"/>
+
 
 
 ## Statistics results
 
 Example of the results achieved with our system include:
 
-![section](icons/succes.png)
+<img src="icons/succes.png" alt="description" width="300"/>
+
+
 we have a file that is signed :
 
-![section](icons/file.png)
-![section](icons/verification.png)
+
+<img src="icons/file.png"  width="300"/>
+
+<img src="icons/verification.png" width="300"/>
+
 
 The processing time for each step of the hybrid signature :
-![section](icons/stats.png)
+
+<img src="icons/stats.png"  width="300"/>
+
 
 
 ## Conlcusion
