@@ -62,7 +62,8 @@ Still in the Signature folder
 4. cmake -DOQS_ENABLE_SIG=ON -DOQS_DIST_BUILD=OFF -DCMAKE_INSTALL_PREFIX=../install ..
 5. cmake --build .     
 6. cmake --install .
-7. cd ..\..\..\
+7. cd ..\\..\\..\\
+
 
 ### Execution
 Run the compilation command :
