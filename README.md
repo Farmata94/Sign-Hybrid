@@ -10,6 +10,12 @@ This repository implements the hybrid signature system, which combines classical
 
 ## Motivation of your work
 
+With the advent of quantum computers, classical cryptographic security systems, such as RSA, DSA and ECDSA, risk becoming vulnerable to quantum attacks. Shor's algorithm solves factorization and discrete logarithm problems, on which the security of these signatures is based.
+
+It is therefore crucial to prepare for the future by integrating cryptographic solutions that are resilient to quantum threats. This work aims to develop a hybrid solution combining classical and post-quantum algorithms, to ensure optimum security against both classical and quantum attacks. This will guarantee the security of digital signatures, even with the rise of quantum computers, while maintaining compatibility with current technologies.
+
+The aim is to create a solution capable of withstanding present and future threats, anticipating the impact of the post-quantum era on cryptography.
+
 ## Implementation description
 
 The project is composed of two main components: a backend in C for cryptographic operations and a graphical interface in Python using PyQt5
