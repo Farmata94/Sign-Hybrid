@@ -114,6 +114,13 @@ The processing time for each step of the hybrid signature :
 
 
 ## Conlcusion
+
+This project is part of a proactive approach to secure digital communications in the post-quantum era. By combining a classic signature and a signature resistant to quantum attacks, we have put in place a hybrid solution that combines compatibility with current systems and robustness against future threats.
+
+The C implementation of different signature algorithms, coupled with an intuitive graphical interface in Python, allows not only to test different combinations of signatures, but also to measure their performance in terms of execution time.
+
+The results obtained show that the hybrid system is able to ensure the integrity and authenticity of files while remaining accessible to the user through a clear interface. This solution provides a solid foundation for future research or integrations into more complex systems as quantum technologies become reality.
+
 ## Authors
 
 CISSE Farmata
