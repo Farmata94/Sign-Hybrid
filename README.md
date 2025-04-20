@@ -99,7 +99,7 @@ Example of the results achieved with our system include:
 <img src="icons/succes.png" alt="description" width="300"/>
 
 
-we have a file that is signed :
+We have a file that is signed :
 
 
 <img src="icons/file.png"  width="300"/>
