@@ -20,7 +20,7 @@ The aim is to create a solution capable of withstanding present and future threa
 
 The project is composed of two main components: a backend in C for cryptographic operations and a graphical interface in Python using PyQt5
 
-#### Project structure :
+### Project structure :
 
 1. [`rsa_sign.c`](Signature/rsa_sign.c) allows to implement the RSA's signature
 2. [`rsa_sign.h`](Signature/rsa_sign.h) allow to call the function that implements RSA's signature
