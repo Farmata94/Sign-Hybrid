@@ -35,7 +35,7 @@ The project is composed of two main components: a backend in C for cryptographic
 11. [`hybrid_signature.c`](Signature/hybrid_signature.c) allows to call twice function that implement signature and implement the hybrid signature
 12. [`interface`](interface/signature_gui.py) allows to call twice function that implement signature and implement the hybrid signature
 
-### Functions developed:
+### Functions developed :
 
 - Import a file to be signed.
 - Selection of two signature algorithms (traditional + post-quantum).
@@ -43,7 +43,7 @@ The project is composed of two main components: a backend in C for cryptographic
 - Signature verification.
 - Visualization of results in table (setup, sign, verify).
 
-### Work distribution
+### Work distribution :
 
 - Farmata: implementation of verification and hybrid signatures, site GUI, back-end (connection)
 - Noémie: implementation of classical and quantum signatures, site GUI
