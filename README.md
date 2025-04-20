@@ -45,9 +45,9 @@ The project is composed of two main components: a backend in C for cryptographic
 
 ### Work distribution
 
-- Farmata : implémentation des vérifications et des signatures-hybrid, interface graphique du site, back-end du site
-- Noémie : implémentation des signatures classique et quantique, 
-- Cabrel : implémentation des signature classique et quantique, interface graphique du site
+- Farmata: implementation of verification and hybrid signatures, site GUI, back-end (connection)
+- Noémie: implementation of classical and quantum signatures, site GUI
+- Cabrel: implementation of classical and quantum signatures, site GUI
 
 
 ## How to install your GUI
