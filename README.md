@@ -124,7 +124,7 @@ TAYO FOYO Cabrel
  
 Supervised by RICCI Sara
 
-#### Work distribution
+#### WORK DISTRIBUTION
 
 - Farmata : implementation of verification and hybrid signatures, site GUI, back-end (connecting results)
 - Noémie : implementation of classical and quantum signatures, site GUI
