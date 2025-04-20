@@ -43,13 +43,6 @@ The project is composed of two main components: a backend in C for cryptographic
 - Signature verification.
 - Visualization of results in table (setup, sign, verify).
 
-### Work distribution :
-
-- Farmata: implementation of verification and hybrid signatures, site GUI, back-end (connection)
-- Noémie: implementation of classical and quantum signatures, site GUI
-- Cabrel: implementation of classical and quantum signatures, site GUI
-
-
 ## How to install your GUI
 ### Prerequisites :
 - Python 3.9 or higher
@@ -130,3 +123,10 @@ MBONGO Noémie
 TAYO FOYO Cabrel
  
 Supervised by RICCI Sara
+
+#### Work distribution
+
+- Farmata: implementation of verification and hybrid signatures, site GUI, back-end (connection)
+- Noémie: implementation of classical and quantum signatures, site GUI
+- Cabrel: implementation of classical and quantum signatures, site GUI
+
