@@ -126,7 +126,7 @@ Supervised by RICCI Sara
 
 #### Work distribution
 
-- Farmata: implementation of verification and hybrid signatures, site GUI, back-end (connection)
-- Noémie: implementation of classical and quantum signatures, site GUI
-- Cabrel: implementation of classical and quantum signatures, site GUI
+- Farmata : implementation of verification and hybrid signatures, site GUI, back-end (connecting results)
+- Noémie : implementation of classical and quantum signatures, site GUI
+- Cabrel : implementation of classical and quantum signatures, site GUI
 
