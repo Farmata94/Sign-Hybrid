@@ -8,6 +8,24 @@ This repository implements the hybrid signature system, which combines classical
 
 ## Introduction
 
+With the advent of quantum computing, traditional cryptographic systems such as RSA, DSA, and ECDSA are becoming increasingly vulnerable 
+to quantum attacks — particularly those based on Shor’s algorithm. This project introduces a **hybrid digital signature solution** that combines:
+
+- A **classical algorithm** (RSA, DSA, or ECDSA)  
+- A **post-quantum algorithm** (Dilithium, Falcon, or Phinics)
+
+🎯 **Objectives**  
+- Ensure a **secure transition** from classical to post-quantum cryptography  
+- Maintain **compatibility** with current infrastructures and systems  
+- Reinforce **resilience** against both present and future cryptographic threats
+
+💡 **Key Features**  
+- Hybrid signing and verification of files  
+- Graphical interface with **algorithm selection** (via PyQt5)  
+- Adjustable **security levels**: Standard, High, Maximum  
+- Built-in **execution time measurement** for benchmarking (keygen, sign, verify)
+
+
 ## Motivation of your work
 
 With the advent of quantum computers, classical cryptographic security systems, such as RSA, DSA and ECDSA, risk becoming vulnerable to quantum attacks. Shor's algorithm solves factorization and discrete logarithm problems, on which the security of these signatures is based.
