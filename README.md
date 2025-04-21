@@ -8,8 +8,7 @@ This repository implements the hybrid signature system, which combines classical
 
 ## Introduction
 
-With the advent of quantum computing, traditional cryptographic systems such as RSA, DSA, and ECDSA are becoming increasingly vulnerable 
-to quantum attacks — particularly those based on Shor’s algorithm. This project introduces a **hybrid digital signature solution** that combines:
+This project presents a concrete and educational implementation of a hybrid digital signature system that merges classical and post-quantum cryptography. Rather than focusing solely on the theoretical motivations, it aims to provide a practical tool to evaluate, benchmark, and visualize the behavior of hybrid signatures in real use cases. This project introduces a **hybrid digital signature solution** that combines:
 
 - A **classical algorithm** (RSA, DSA, or ECDSA)  
 - A **post-quantum algorithm** (Dilithium, Falcon)
