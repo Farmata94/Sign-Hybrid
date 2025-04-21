@@ -12,7 +12,7 @@ With the advent of quantum computing, traditional cryptographic systems such as 
 to quantum attacks — particularly those based on Shor’s algorithm. This project introduces a **hybrid digital signature solution** that combines:
 
 - A **classical algorithm** (RSA, DSA, or ECDSA)  
-- A **post-quantum algorithm** (Dilithium, Falcon, or Phinics)
+- A **post-quantum algorithm** (Dilithium, Falcon)
 
 🎯 **Objectives**  
 - Ensure a **secure transition** from classical to post-quantum cryptography  
