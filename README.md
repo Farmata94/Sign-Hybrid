@@ -130,7 +130,7 @@ The processing time for each step of the hybrid signature :
 
 
 
-## Conlcusion
+## Conclusion
 
 This project is part of a proactive approach to secure digital communications in the post-quantum era. By combining a classic signature and a signature resistant to quantum attacks, we have put in place a hybrid solution that combines compatibility with current systems and robustness against future threats.
 
